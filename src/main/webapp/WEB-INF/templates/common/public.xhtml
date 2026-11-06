@@ -25,8 +25,13 @@
 		<div class="ui-g-12 ui-md-2 side-panel">
 			<div class="ui-g-12 menu-container">
 				<h:form>
-					<h:graphicImage value="#{resource['/images/CTlogobadge128.png']}"
-						class="side-panel-img" />
+					<h:outputLink value="#{request.contextPath}/" title="Home">
+						<h:graphicImage value="#{resource['/images/CTlogobadge128.png']}"
+							class="side-panel-img" />
+					</h:outputLink>
+					<div style="text-align:center;margin:4px 0 8px 0;">
+						<span style="background:#cc0000;color:#fff;font-size:11px;font-weight:bold;padding:3px 8px;border-radius:3px;">JBoss EAP 7.4</span>
+					</div>
 					<p:menu>
 						<p:menuitem value="Tracking"
 							url="#{request.contextPath}/public/track.xhtml" />
