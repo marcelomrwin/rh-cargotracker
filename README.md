@@ -39,15 +39,16 @@ The WAR file will be generated at `target/cargo-tracker.war`.
 
 1. Download and install [JBoss EAP 7.4](https://developers.redhat.com/products/eap/download).
 
-2. Start EAP with the **full profile** (required for JMS/messaging support):
-   ```shell
-   JAVA_HOME=$(jenv javahome 11) $EAP_HOME/bin/standalone.sh -c standalone-full.xml
-   ```
-   > **Important:** EAP 7.4 requires Java 11. Java 17+ causes a startup failure (`UnsupportedOperationException: Setting a system-wide Policy object is not supported`).
+2. Ensure `JAVA_HOME` points to a **Java 11** JDK. EAP 7.4 requires Java 11 — Java 17+ causes a startup failure (`UnsupportedOperationException: Setting a system-wide Policy object is not supported`).
 
-3. Configure the H2 datasource (run once — persisted automatically in `standalone-full.xml`):
+3. Start EAP with the **full profile** (required for JMS/messaging support):
    ```shell
-   JAVA_HOME=$(jenv javahome 11) $EAP_HOME/bin/jboss-cli.sh --connect --command=\
+   $EAP_HOME/bin/standalone.sh -c standalone-full.xml
+   ```
+
+4. Configure the H2 datasource (run once — persisted automatically in `standalone-full.xml`):
+   ```shell
+   $EAP_HOME/bin/jboss-cli.sh --connect --command=\
    '/subsystem=datasources/data-source=CargoTrackerDS:add(
      jndi-name="java:/jdbc/CargoTrackerDatabase",
      driver-name="h2",
@@ -59,12 +60,12 @@ The WAR file will be generated at `target/cargo-tracker.war`.
    ```
    > The application does not define its own datasource. It expects `java:/jdbc/CargoTrackerDatabase` to be configured at the server level.
 
-4. Copy the WAR to the EAP deployments folder:
+5. Copy the WAR to the EAP deployments folder:
    ```shell
    cp target/cargo-tracker.war $EAP_HOME/standalone/deployments/
    ```
 
-5. Access the application at: http://localhost:8080/cargo-tracker
+6. Access the application at: http://localhost:8080/cargo-tracker
 
 ## Run in a container
 
