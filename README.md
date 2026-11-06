@@ -162,17 +162,10 @@ by simply digging into the code to see how things are implemented.
 ## Exploring the Tests
 
 Cargo Tracker's testing is done using JUnit and Arquillian. The Arquillian configuration
-uses a [remote container](http://arquillian.org/arquillian-core/#_containers) (Payara 4.1). Therefore, to perform a test you will need to make sure
-to have a container running. 
+uses a [remote container](http://arquillian.org/arquillian-core/#_containers). Therefore, to perform a test you will need to make sure
+to have a container running.
 
 ## Known Issues
-* If you are running older versions of Payara, you will get a log message stating that SSL certificates have expired. This won't get in the way of functionality, but it will
-  stop log messages from being printed to the IDE console. You can solve this issue by manually removing the expired certificates from the Payara domain, as 
-  explained [here](https://github.com/payara/Payara/issues/3038).
-* If you restart the application a few times, you will run into a bug causing a spurious deployment failure. While the problem can be annoying, it's harmless.
-  Just re-run the application (make sure to completely shut down Payara first).
-* Sometimes when the server is not shut down correctly or there is a locking/permissions issue, the Derby database that 
-  the application uses get's corrupted, resulting in strange database errors. If 
-  this occurs, you will need to stop the application and clean the database. You 
-  can do this by simply removing \tmp\cargo-tracker-database from the file 
-  system and restarting the application.
+
+* **Deployment fails on first start:** The H2 datasource must be configured in EAP before the WAR is deployed. If the application fails to deploy with `jboss.naming.context.java.jdbc.CargoTrackerDatabase not found`, configure the datasource via `jboss-cli.sh` as described in the setup section above, then trigger a redeploy by removing the `.failed` marker and creating a `.dodeploy` marker in the deployments folder.
+* **Data is wiped on restart:** The application uses an in-memory H2 database. All data entered is lost when the server restarts — this is expected behavior and allows starting from a blank slate easily.
