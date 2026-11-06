@@ -63,7 +63,7 @@ Access the application at: http://localhost:8080/cargo-tracker
 |--------|---------|------|
 | `javaee7` | Payara 4.1 | 8 |
 | `jee7-eap7` | JBoss EAP 7.4 | 11 |
-| `jee10-eap8` | JBoss EAP 8.0 | 17 |
+| `jee10-eap8` | JBoss EAP 8.1 | 17 |
 
 ---
 
