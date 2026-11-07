@@ -32,7 +32,7 @@ COPY --from=builder --chown=jboss:root $JBOSS_HOME $JBOSS_HOME
 
 # Copy the application WAR
 # The PostgreSQL driver module is installed by Galleon (postgresql-driver layer)
-COPY --chown=jboss:root deployments/*.war $JBOSS_HOME/standalone/deployments
+COPY --chown=jboss:root deployments/cargo-tracker.war $JBOSS_HOME/standalone/deployments/ROOT.war
 
 # Ensure correct permissions
 RUN chmod -R ug+rwX $JBOSS_HOME
