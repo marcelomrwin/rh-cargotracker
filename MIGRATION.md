@@ -44,9 +44,9 @@ The MTA CLI provides the `openrewrite` command to automatically transform source
 **Chapter 8 — "Performing a transformation with the MTA command-line interface"**
 of *"Using the migration toolkit for applications command-line interface"*.
 
-> **Important — MTA 8.3.3 compatibility note:** The `mta-cli openrewrite` command is marked as **deprecated** in MTA 8.3.3 and will be removed in a future version. Additionally, the recipe names differ between the documentation and the actual MTA 8.3.3 release (e.g., `org.jboss.windup.JavaxToJakarta` in the docs corresponds to `jakarta-imports` in the CLI). The commands below reflect what was used during the original migration; they are **not guaranteed to work as-is on MTA 8.3.3**.
+> **Important — MTA 8.3.3 compatibility note:** The `mta-cli openrewrite` command is marked as **deprecated** in MTA 8.3.3 (warning: *"The 'openrewrite' command is deprecated and will be removed"*). The recipe names also differ from the documentation: `org.jboss.windup.JavaxToJakarta` in the docs corresponds to `jakarta-imports` in the MTA 8.3.3 CLI. The MTA 8.3 documentation (Chapter 8) still documents `openrewrite` as the official transformation mechanism but does not describe a replacement command. Consult the latest online documentation for the current recommended approach.
 >
-> The changes described below are already applied in this branch. These sections serve as a reference log of what the tool did.
+> The changes described below are already applied in this branch. These sections serve as a reference log of what the tool did, not as reproducible commands for MTA 8.3.3.
 
 ### Jakarta imports
 
