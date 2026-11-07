@@ -40,19 +40,29 @@ The full MTA report is available in the [`mta-report/`](mta-report/index.html) d
 
 ## Step 2 — Automated changes
 
-The MTA CLI provides the `openrewrite` command to automatically transform source code, documented in
+The MTA CLI provides the `openrewrite` command to transform source code automatically, documented in
 **Chapter 8 — "Performing a transformation with the MTA command-line interface"**
 of *"Using the migration toolkit for applications command-line interface"*.
 
-> **Important — MTA 8.3.3 compatibility note:** The `mta-cli openrewrite` command is marked as **deprecated** in MTA 8.3.3 (warning: *"The 'openrewrite' command is deprecated and will be removed"*). The recipe names also differ from the documentation: `org.jboss.windup.JavaxToJakarta` in the docs corresponds to `jakarta-imports` in the MTA 8.3.3 CLI. The MTA 8.3 documentation (Chapter 8) still documents `openrewrite` as the official transformation mechanism but does not describe a replacement command. Consult the latest online documentation for the current recommended approach.
+> **MTA 8.3.3 on macOS ARM64 — known limitation:** The `mta-cli openrewrite` command does **not work** on macOS ARM64 with Podman. The MTA 8.3.3 container image (`mta-cli-rhel9:8.3.3`) pre-creates `/tmp/source-app` with root ownership, but the container runs as a non-root user — this causes permission errors when the tool tries to copy the source files inside the container. This is a bug in the image, not a configuration issue.
 >
-> The changes described below are already applied in this branch. These sections serve as a reference log of what the tool did, not as reproducible commands for MTA 8.3.3.
+> Additionally, `openrewrite` is marked **deprecated** in MTA 8.3.3 and the documentation (Chapter 2.2) does not document a replacement command.
+>
+> The correct command syntax for MTA 8.3.3 (on a supported platform such as Linux) is:
+> ```shell
+> mta-cli openrewrite --input=<path_to_source_code> --target=jakarta-imports --goal=run
+> mta-cli openrewrite --input=<path_to_source_code> --target=jakarta-xml --goal=run
+> mta-cli openrewrite --input=<path_to_source_code> --target=eap8-xml --goal=run
+> ```
+> Note: recipe names in MTA 8.3.3 (`jakarta-imports`, `jakarta-xml`, `eap8-xml`) differ from the documentation (`org.jboss.windup.JavaxToJakarta`, etc.).
+>
+> The changes described below are already applied in this branch and serve as a reference log of what the recipes do.
 
-### Jakarta imports
+### Jakarta imports (`jakarta-imports` recipe)
 
-The `jakarta-imports` recipe (OpenRewrite recipe `org.jboss.windup.JavaxToJakarta`) replaced all `javax.*` imports with `jakarta.*` equivalents in Java source files, and updated `javax` artifact coordinates that were already declared in `pom.xml`.
+Replaced all `javax.*` imports with `jakarta.*` equivalents in Java source files, and updated `javax` artifact coordinates already declared in `pom.xml`.
 
-Example of change applied:
+Example:
 
 ```java
 // Before
@@ -64,7 +74,7 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 ```
 
-Dependencies updated in `pom.xml` by the tool (existing `javax` coords replaced with `jakarta` equivalents):
+Dependencies updated in `pom.xml` (existing `javax` coords replaced — recipe does **not** add new dependencies):
 
 ```
 jakarta.annotation-api, jakarta.inject-api, jakarta.jms-api,
@@ -72,15 +82,13 @@ jakarta.json-api, jakarta.persistence-api, jakarta.transaction-api,
 jakarta.websocket-api
 ```
 
-> **Note:** The recipe only replaces artifacts already declared in `pom.xml`. It does not add new dependencies. Additional Jakarta dependencies not present in the original `pom.xml` were added manually (see Step 3).
+### Jakarta XML (`jakarta-xml` recipe)
 
-### Jakarta XML
+Updated `persistence.xml`: namespace version and property names changed to Jakarta EE equivalents.
 
-The `jakarta-xml` recipe (OpenRewrite recipe `org.jboss.windup.javax-jakarta.PersistenceXML`) updated `persistence.xml`: namespace version and property names changed to Jakarta EE equivalents.
+### EAP 8 XML (`eap8-xml` recipe)
 
-### EAP 8 XML
-
-The `eap8-xml` recipe updated `web.xml` and `test-web.xml` to use EAP 8 compatible namespaces.
+Updated `web.xml` and `test-web.xml` to use EAP 8 compatible namespaces.
 
 ---
 
