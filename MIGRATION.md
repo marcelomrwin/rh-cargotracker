@@ -79,7 +79,7 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 ```
 
-Dependencies updated in `pom.xml` (existing `javax` coords replaced  - recipe does **not** add new dependencies):
+The recipe also **adds** the following Jakarta dependencies to `pom.xml`, replacing the original single `javax:javaee-api` entry:
 
 ```
 jakarta.annotation-api, jakarta.inject-api, jakarta.jms-api,
