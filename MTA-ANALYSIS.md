@@ -1,4 +1,4 @@
-# MTA Analysis — Cargo Tracker EAP 7 to EAP 8
+# MTA Analysis  - Cargo Tracker EAP 7 to EAP 8
 
 This document describes how to use the Migration Toolkit for Applications (MTA) command-line interface to analyze the Cargo Tracker application running on JBoss EAP 7 and identify the changes required to migrate it to JBoss EAP 8.
 
@@ -9,7 +9,7 @@ A pre-generated analysis report is available in the [`mta-report/`](mta-report/i
 The Migration Toolkit for Applications (MTA) is a Red Hat tool that analyzes applications and generates detailed reports identifying migration issues, their severity, and guidance on how to resolve them.
 
 For installation instructions, refer to the official documentation:
-**"Installing the migration toolkit for applications"** — available at the [Red Hat Customer Portal](https://access.redhat.com/documentation/en-us/migration_toolkit_for_applications).
+**"Installing the migration toolkit for applications"**  - available at the [Red Hat Customer Portal](https://access.redhat.com/documentation/en-us/migration_toolkit_for_applications).
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ For installation instructions, refer to the official documentation:
 
 ## Running the analysis
 
-### Step 1 — Verify available targets
+### Step 1  - Verify available targets
 
 ```shell
 mta-cli rules list-targets
@@ -31,7 +31,7 @@ mta-cli rules list-targets
 
 Confirm that `eap8` and `eap81` appear in the output.
 
-### Step 2 — Build the application
+### Step 2  - Build the application
 
 Build the WAR file from the `jee7-eap7` branch:
 
@@ -41,7 +41,7 @@ mvn clean package -DskipTests
 
 The WAR file will be generated at `target/cargo-tracker.war`.
 
-### Step 3 — Run the analysis
+### Step 3  - Run the analysis
 
 ```shell
 mta-cli analyze \
@@ -64,7 +64,7 @@ Where:
 
 > **Note:** When `--run-local=false` is set, the MTA CLI uses container images from `registry.redhat.io` to run the analysis engine. The analysis of non-Java applications always runs in container mode.
 
-### Step 4 — Access the report
+### Step 4  - Access the report
 
 When the analysis completes, the CLI prints:
 

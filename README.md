@@ -1,7 +1,7 @@
 # Eclipse Cargo Tracker - Applied Domain-Driven Design Blueprints for Jakarta EE
 
 > **This branch (`jee7-eap7`) has been adapted to run on JBoss EAP 7.4 with Java 11.**
-> The original application targets Payara/Glassfish with Java 8 — see the [`javaee7`](https://github.com/marcelomrwin/rh-cargotracker/tree/javaee7) branch for that version.
+> The original application targets Payara/Glassfish with Java 8  - see the [`javaee7`](https://github.com/marcelomrwin/rh-cargotracker/tree/javaee7) branch for that version.
 
 ## MTA Analysis
 
@@ -14,7 +14,7 @@ This branch includes an MTA (Migration Toolkit for Applications) analysis report
 
 ### Prerequisites
 
-- Java 11 (`JAVA_HOME` must point to a Java 11 JDK — EAP 7.4 does not support Java 17+)
+- Java 11 (`JAVA_HOME` must point to a Java 11 JDK  - EAP 7.4 does not support Java 17+)
 - Maven 3.6+
 - JBoss EAP 7.4
 
@@ -175,4 +175,4 @@ to have a container running.
 ## Known Issues
 
 * **Deployment fails on first start:** The H2 datasource must be configured in EAP before the WAR is deployed. If the application fails to deploy with `jboss.naming.context.java.jdbc.CargoTrackerDatabase not found`, configure the datasource via `jboss-cli.sh` as described in the setup section above, then trigger a redeploy by removing the `.failed` marker and creating a `.dodeploy` marker in the deployments folder.
-* **Data is wiped on restart:** The application uses an in-memory H2 database. All data entered is lost when the server restarts — this is expected behavior and allows starting from a blank slate easily.
+* **Data is wiped on restart:** The application uses an in-memory H2 database. All data entered is lost when the server restarts  - this is expected behavior and allows starting from a blank slate easily.
