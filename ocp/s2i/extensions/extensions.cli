@@ -4,21 +4,4 @@ embed-server --std-out=echo --server-config=standalone.xml
 # Required for ${env.CARGO_ENDPOINT} in web.xml to be resolved at runtime.
 /subsystem=ee:write-attribute(name=spec-descriptor-property-replacement,value=true)
 
-# Configure the PostgreSQL datasource bound to the JNDI name the application expects.
-# Connection parameters are injected at runtime via environment variables:
-#   CARGO_POSTGRES_HOST, CARGO_POSTGRES_PORT, CARGO_POSTGRES_NAME
-#   CARGO_POSTGRES_USERNAME, CARGO_POSTGRES_PASSWORD
-/subsystem=datasources/data-source=CargoTrackerDS:add(\
-  jndi-name=java:/jdbc/CargoTrackerDatabase,\
-  driver-name=postgresql,\
-  connection-url=jdbc:postgresql://${env.CARGO_POSTGRES_HOST}:${env.CARGO_POSTGRES_PORT}/${env.CARGO_POSTGRES_NAME},\
-  driver-class=org.postgresql.Driver,\
-  user-name=${env.CARGO_POSTGRES_USERNAME},\
-  password=${env.CARGO_POSTGRES_PASSWORD},\
-  min-pool-size=2,\
-  max-pool-size=20,\
-  enabled=true,\
-  use-java-context=true,\
-  jta=false)
-
 quit
