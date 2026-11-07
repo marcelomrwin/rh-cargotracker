@@ -38,23 +38,19 @@ The full MTA report is available in the [`mta-report/`](mta-report/index.html) d
 
 ---
 
-## Step 2 — Automated changes (mta-cli openrewrite)
+## Step 2 — Automated changes
 
-The MTA CLI provides the `openrewrite` command to automatically transform source code.
-Documented in **Chapter 8 — "Performing a transformation with the MTA command-line interface"**
+The MTA CLI provides the `openrewrite` command to automatically transform source code, documented in
+**Chapter 8 — "Performing a transformation with the MTA command-line interface"**
 of *"Using the migration toolkit for applications command-line interface"*.
 
-> **Note:** The `openrewrite` command requires the container runtime (Podman/Docker) to be configured.
+> **Important — MTA 8.3.3 compatibility note:** The `mta-cli openrewrite` command is marked as **deprecated** in MTA 8.3.3 and will be removed in a future version. Additionally, the recipe names differ between the documentation and the actual MTA 8.3.3 release (e.g., `org.jboss.windup.JavaxToJakarta` in the docs corresponds to `jakarta-imports` in the CLI). The commands below reflect what was used during the original migration; they are **not guaranteed to work as-is on MTA 8.3.3**.
+>
+> The changes described below are already applied in this branch. These sections serve as a reference log of what the tool did.
 
 ### Jakarta imports
 
-```shell
-mta-cli openrewrite \
-  --input=<path_to_source_code> \
-  --target=org.jboss.windup.JavaxToJakarta
-```
-
-This recipe replaced all `javax.*` imports with `jakarta.*` equivalents in Java source files, and updated `javax` artifact coordinates in `pom.xml`.
+The `jakarta-imports` recipe (OpenRewrite recipe `org.jboss.windup.JavaxToJakarta`) replaced all `javax.*` imports with `jakarta.*` equivalents in Java source files, and updated `javax` artifact coordinates that were already declared in `pom.xml`.
 
 Example of change applied:
 
@@ -68,7 +64,7 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 ```
 
-Dependencies added to `pom.xml` by the tool:
+Dependencies updated in `pom.xml` by the tool (existing `javax` coords replaced with `jakarta` equivalents):
 
 ```
 jakarta.annotation-api, jakarta.inject-api, jakarta.jms-api,
@@ -76,19 +72,15 @@ jakarta.json-api, jakarta.persistence-api, jakarta.transaction-api,
 jakarta.websocket-api
 ```
 
+> **Note:** The recipe only replaces artifacts already declared in `pom.xml`. It does not add new dependencies. Additional Jakarta dependencies not present in the original `pom.xml` were added manually (see Step 3).
+
 ### Jakarta XML
 
-```shell
-mta-cli openrewrite \
-  --input=<path_to_source_code> \
-  --target=org.jboss.windup.javax-jakarta.PersistenceXML
-```
-
-Updated `persistence.xml`: namespace version and property names changed to Jakarta EE equivalents.
+The `jakarta-xml` recipe (OpenRewrite recipe `org.jboss.windup.javax-jakarta.PersistenceXML`) updated `persistence.xml`: namespace version and property names changed to Jakarta EE equivalents.
 
 ### EAP 8 XML
 
-The tool also updated `web.xml` and `test-web.xml` to use EAP 8 compatible namespaces.
+The `eap8-xml` recipe updated `web.xml` and `test-web.xml` to use EAP 8 compatible namespaces.
 
 ---
 
