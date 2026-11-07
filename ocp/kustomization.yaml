@@ -8,9 +8,8 @@ resources:
 - base/pg-deployment.yaml
 - base/pg-svc.yaml
 
-labels:
-- pairs:
-    app.kubernetes.io/part-of: cargo-tracker-app
+commonLabels:
+  app.kubernetes.io/part-of: cargo-tracker-app
 
 configMapGenerator:
 - name: jboss-cli

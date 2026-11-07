@@ -3,6 +3,7 @@ kind: Route
 metadata:
   name: cargo-tracker
 spec:
+  path: /cargo-tracker
   port:
     targetPort: 8080
   tls:
