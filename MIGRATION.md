@@ -102,7 +102,7 @@ The Red Hat EAP 8 BOM was introduced to manage Jakarta dependency versions:
 
 ```xml
 <properties>
-    <version.server.bom>8.0.5.GA-redhat-00005</version.server.bom>
+    <version.server.bom>8.1.9.GA-redhat-00006</version.server.bom>
 </properties>
 
 <dependencyManagement>

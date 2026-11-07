@@ -29,7 +29,7 @@
 
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
-        <version.server.bom>8.0.5.GA-redhat-00005</version.server.bom>
+        <version.server.bom>8.1.9.GA-redhat-00006</version.server.bom>
 
 		<!-- Arquillian properties -->
 		<arquillian.core.version>1.4.1.Final</arquillian.core.version>
@@ -184,6 +184,7 @@
 		<dependency>
 			<groupId>org.jboss.shrinkwrap.resolver</groupId>
 			<artifactId>shrinkwrap-resolver-impl-maven</artifactId>
+			<version>3.3.7</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
