@@ -1,5 +1,54 @@
 # Eclipse Cargo Tracker - Applied Domain-Driven Design Blueprints for Jakarta EE
 
+> **This branch (`jakartaee10-eap8`) has been migrated to run on JBoss EAP 8.1 with Java 17 and Jakarta EE 10.**
+> This is the result of migrating the [`jee7-eap7`](https://github.com/marcelomrwin/rh-cargotracker/tree/jee7-eap7) branch using the [MTA (Migration Toolkit for Applications)](https://developers.redhat.com/products/mta).
+
+## What changed from jee7-eap7
+
+- Java upgraded from 11 to 17
+- All `javax.*` imports replaced with `jakarta.*` equivalents (276 changes)
+- XML deployment descriptors updated to Jakarta EE namespaces
+- Maven dependencies updated: `javax` groupId replaced by `jakarta.platform`; Red Hat EAP 8 BOM introduced
+- Primefaces upgraded from `8.0` to `12.0.0` with classifier `jakarta`; theme changed from `omega` to `saga`
+- `beans.xml` updated to Jakarta EE 3.0 namespace with `bean-discovery-mode="all"` (required — CDI 4.0 changed the default)
+- `faces-config.xml` updated to Jakarta Faces 4.0
+- `@PrivateOwned` (EclipseLink-specific) removed — no equivalent in Hibernate
+- Hibernate implicit naming strategy for sequences/tables updated
+- Database changed from H2 in-memory to **PostgreSQL**
+
+## Prerequisites
+
+- Java 17 (`JAVA_HOME` must point to a Java 17 JDK)
+- Maven 3.6+
+- Access to the Red Hat Maven repository (required for the EAP 8 BOM): `https://maven.repository.redhat.com/ga/`
+- JBoss EAP 8.1 and a PostgreSQL instance (to run locally)
+
+## Build
+
+```shell
+mvn clean package -DskipTests
+```
+
+> **Note:** The `pom.xml` uses the Red Hat EAP 8 BOM (`org.jboss.bom:jboss-eap-ee-with-tools`), which is not available in Maven Central. Add the Red Hat GA repository to your `~/.m2/settings.xml` or to the project `pom.xml` before building.
+
+The WAR file will be generated at `target/cargo-tracker.war`.
+
+## Deploy on OpenShift
+
+This branch includes Kubernetes/OpenShift manifests and an S2I Dockerfile for containerized deployment.
+
+See [ocp-deployment.md](ocp-deployment.md) for the complete step-by-step OpenShift deployment guide.
+
+## Migration path
+
+| Branch | Runtime | Java |
+|--------|---------|------|
+| `javaee7` | Payara 4.1 | 8 |
+| `jee7-eap7` | JBoss EAP 7.4 | 11 |
+| `jakartaee10-eap8` | JBoss EAP 8.1 | 17 |
+
+---
+
 ## Overview
 
 The project demonstrates how you can develop applications with Jakarta EE using widely adopted architectural best practices like Domain-Driven 
@@ -16,33 +65,12 @@ has several interfaces described in the following sections.
 For further details on the project, please visit: https://eclipse-ee4j.github.io/cargotracker/.
 
 ![Cargo Tracker cover](cargo_tracker_cover.png)
- 
-## Getting Started
-
-The [project website](https://eclipse-ee4j.github.io/cargotracker/) has detailed information on how to get started.
-
-The simplest steps are the following (no IDE required):
-
-* Get the project source code.
-* Ensure you are running Java SE 8. The project by default uses Payara 4.1, which supports Java SE 8.
-* Make sure JAVA_HOME is set.
-* As long as you have Maven set up properly, navigate to the project source root and 
-  type: `mvn package cargo:run -Ppayara`
-* Go to http://localhost:8080/cargo-tracker
-
-To set up in Eclipse, follow these steps:
-
-* Set up [Java SE 8](https://www.azul.com/downloads/zulu-community/?version=java-8-lts), [the 2020-06 release of Eclipse for Enterprise Java Developers](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-enterprise-java-developers) (this is the latest Eclipse IDE version that supports Java SE 8) and [Payara 4.1](https://repo1.maven.org/maven2/fish/payara/distributions/payara/4.1.2.181/payara-4.1.2.181.zip) (Payara 5 is not supported yet. Payara 4.1 only supports Java SE 8). You will also need to set up [Payara Tools](https://marketplace.eclipse.org/content/payara-tools) in Eclipse.
-* Import this code in Eclipse as a Maven project, 
-  Eclipse will do the rest for you. Proceed with clean/building the application.
-* After the project is built (which will take a while the very first time as 
-  Maven downloads dependencies), simply run it via Payara 4.
 
 ## Exploring the Application
 
 After the application runs, it will be available at: 
 http://localhost:8080/cargo-tracker/. Under the hood, the application uses a 
-number of Jakarta EE (Java EE 7) features including JSF, CDI, EJB, JPA, JAX-RS, WebSocket, JSON Processing, Bean Validation and JMS.
+number of Jakarta EE 10 features including Faces, CDI, EJB, JPA, JAX-RS, WebSocket, JSON Processing, Bean Validation and JMS.
 
 There are several web interfaces, REST interfaces and a file system scanning
 interface. It's probably best to start exploring the interfaces in the rough
@@ -113,35 +141,8 @@ sink example for demonstrating the vast amount of APIs and features in Jakarta E
 we do use a very representative set. You'll find that you'll learn a fair amount
 by simply digging into the code to see how things are implemented.
 
-## Exploring the Tests
-
-Cargo Tracker's testing is done using JUnit and Arquillian. The Arquillian configuration
-uses a [remote container](http://arquillian.org/arquillian-core/#_containers) (Payara 4.1). Therefore, to perform a test you will need to make sure
-to have a container running. 
-
-## Testing Locally with Payara
-For testing locally you will first need to run a Payara 4.1 server.
-
-You can do that with the following script:
-```shell script
-wget https://repo1.maven.org/maven2/fish/payara/distributions/payara/4.1.2.181/payara-4.1.2.181.zip
-unzip payara-4.1.2.181.zip && cd payara41/bin
-./asadmin start-domain
-```
-
-Now for running the tests: 
-```shell script
-mvn -Ppayara -DskipTests=false test
-```
-
 ## Known Issues
-* If you are running older versions of Payara, you will get a log message stating that SSL certificates have expired. This won't get in the way of functionality, but it will
-  stop log messages from being printed to the IDE console. You can solve this issue by manually removing the expired certificates from the Payara domain, as 
-  explained [here](https://github.com/payara/Payara/issues/3038).
-* If you restart the application a few times, you will run into a bug causing a spurious deployment failure. While the problem can be annoying, it's harmless.
-  Just re-run the application (make sure to completely shut down Payara first).
-* Sometimes when the server is not shut down correctly or there is a locking/permissions issue, the Derby database that 
-  the application uses get's corrupted, resulting in strange database errors. If 
-  this occurs, you will need to stop the application and clean the database. You 
-  can do this by simply removing \tmp\cargo-tracker-database from the file 
-  system and restarting the application.
+
+* **Red Hat Maven repository required:** The EAP 8 BOM (`org.jboss.bom:jboss-eap-ee-with-tools`) is not published to Maven Central. The build will fail without access to `https://maven.repository.redhat.com/ga/`.
+* **`javax.sql.DataSource` in web.xml:** The MTA analysis flags `javax.sql.DataSource` as a migration issue, but this is a false positive — `javax.sql` is part of the Java SE standard and was not moved to the `jakarta` namespace. It must not be changed.
+* **Data is wiped on restart:** The application uses a PostgreSQL database. All data is preserved between restarts, but the schema is recreated if the database is empty.
