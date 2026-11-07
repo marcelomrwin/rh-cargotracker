@@ -6,7 +6,7 @@ ENV GALLEON_PROVISION_FEATURE_PACKS org.jboss.eap:wildfly-ee-galleon-pack,org.jb
 ENV GALLEON_PROVISION_LAYERS cloud-default-config,embedded-activemq,postgresql-driver,postgresql-datasource
 
 # Specify the JBoss EAP channel (version)
-ENV GALLEON_PROVISION_CHANNELS org.jboss.eap.channels:eap-8.1
+ENV GALLEON_PROVISION_CHANNELS org.jboss.eap.channels:eap-8.0
 
 # PostgreSQL driver version (used by the postgresql-driver Galleon layer)
 ENV POSTGRESQL_DRIVER_VERSION 42.7.5
