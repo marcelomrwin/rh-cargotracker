@@ -44,19 +44,17 @@ The MTA CLI provides the `openrewrite` command to transform source code automati
 **Chapter 8 — "Performing a transformation with the MTA command-line interface"**
 of *"Using the migration toolkit for applications command-line interface"*.
 
-> **MTA 8.3.3 on macOS ARM64 — known limitation:** The `mta-cli openrewrite` command does **not work** on macOS ARM64 with Podman. The MTA 8.3.3 container image (`mta-cli-rhel9:8.3.3`) pre-creates `/tmp/source-app` with root ownership, but the container runs as a non-root user — this causes permission errors when the tool tries to copy the source files inside the container. This is a bug in the image, not a configuration issue.
->
-> Additionally, `openrewrite` is marked **deprecated** in MTA 8.3.3 and the documentation (Chapter 2.2) does not document a replacement command.
->
-> The correct command syntax for MTA 8.3.3 (on a supported platform such as Linux) is:
-> ```shell
-> mta-cli openrewrite --input=<path_to_source_code> --target=jakarta-imports --goal=run
-> mta-cli openrewrite --input=<path_to_source_code> --target=jakarta-xml --goal=run
-> mta-cli openrewrite --input=<path_to_source_code> --target=eap8-xml --goal=run
-> ```
-> Note: recipe names in MTA 8.3.3 (`jakarta-imports`, `jakarta-xml`, `eap8-xml`) differ from the documentation (`org.jboss.windup.JavaxToJakarta`, etc.).
->
-> The changes described below are already applied in this branch and serve as a reference log of what the recipes do.
+> **Note:** `mta-cli openrewrite` is marked **deprecated** in MTA 8.3.3. The command requires the container runtime (Podman) to be configured. Recipe names in MTA 8.3.3 differ from the printed documentation — use the names listed below.
+
+The command syntax for MTA 8.3.3:
+
+```shell
+mta-cli openrewrite --input=<path_to_source_code> --target=jakarta-imports --goal=run
+mta-cli openrewrite --input=<path_to_source_code> --target=jakarta-xml --goal=run
+mta-cli openrewrite --input=<path_to_source_code> --target=eap8-xml --goal=run
+```
+
+The changes described below are already applied in this branch and serve as a reference log of what each recipe does.
 
 ### Jakarta imports (`jakarta-imports` recipe)
 
