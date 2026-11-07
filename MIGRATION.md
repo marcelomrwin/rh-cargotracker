@@ -44,17 +44,24 @@ The MTA CLI provides the `openrewrite` command to transform source code automati
 **Chapter 8 — "Performing a transformation with the MTA command-line interface"**
 of *"Using the migration toolkit for applications command-line interface"*.
 
-> **Note:** `mta-cli openrewrite` is marked **deprecated** in MTA 8.3.3. The command requires the container runtime (Podman) to be configured. Recipe names in MTA 8.3.3 differ from the printed documentation — use the names listed below.
+> **Note — MTA 8.3.3:** `mta-cli openrewrite` is marked **deprecated** in this version. Recipe names differ from the printed documentation — use the names listed below (`jakarta-imports`, `jakarta-xml`, `eap8-xml`).
 
-The command syntax for MTA 8.3.3:
+> **Container runtime requirement:** The `openrewrite` command always uses a container internally (Podman must be installed and configured). The MTA 8.3.3 container image (`mta-cli-rhel9:8.3.3`) has a known issue: the directory `/tmp/source-app` inside the image is pre-created with root ownership and mode 755. When the command runs as a non-root user, the container cannot write there and silently fails (exits 0 but makes no changes). The workaround is to run `mta-cli openrewrite` as root using `sudo`, with environment variables explicitly forwarded:
 
 ```shell
-mta-cli openrewrite --input=<path_to_source_code> --target=jakarta-imports --goal=run
-mta-cli openrewrite --input=<path_to_source_code> --target=jakarta-xml --goal=run
-mta-cli openrewrite --input=<path_to_source_code> --target=eap8-xml --goal=run
+sudo HOME=/home/<user> \
+     PATH=$PATH:/home/<user>/bin \
+     JAVA_HOME=<path_to_java_17> \
+     JVM_MAX_MEM=4g \
+     mta-cli openrewrite \
+     --input=<path_to_source_code> \
+     --target=jakarta-imports \
+     --goal=run
 ```
 
-The changes described below are already applied in this branch and serve as a reference log of what each recipe does.
+Run once per recipe — repeat with `--target=jakarta-xml` and `--target=eap8-xml`.
+
+The changes described below are already applied in this branch and serve as a reference log of what each recipe does, validated on RHEL 9 Linux ARM64.
 
 ### Jakarta imports (`jakarta-imports` recipe)
 
@@ -82,11 +89,39 @@ jakarta.websocket-api
 
 ### Jakarta XML (`jakarta-xml` recipe)
 
-Updated `persistence.xml`: namespace version and property names changed to Jakarta EE equivalents.
+Updated `persistence.xml` namespace, version and property names to Jakarta EE equivalents.
+
+Before:
+```xml
+<persistence version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/persistence" ...>
+```
+
+After:
+```xml
+<persistence version="3.0"
+    xmlns="https://jakarta.ee/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+        https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+```
 
 ### EAP 8 XML (`eap8-xml` recipe)
 
-Updated `web.xml` and `test-web.xml` to use EAP 8 compatible namespaces.
+Updated `web.xml` to use Jakarta EE 6.0 namespace (EAP 8 compatible).
+
+Before:
+```xml
+<web-app version="4.0" xmlns="http://xmlns.jcp.org/xml/ns/javaee" ...>
+```
+
+After:
+```xml
+<web-app version="6.0"
+    xmlns="https://jakarta.ee/xml/ns/jakartaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+        https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
+```
 
 ---
 
