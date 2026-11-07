@@ -35,18 +35,13 @@
 		<arquillian.core.version>1.4.1.Final</arquillian.core.version>
 		<skipTests>true</skipTests>
 
-		<!-- Codehaus Cargo plugin properties -->
-		<cargo.version>1.8.1</cargo.version>
-		<cargo.payara.container_id>glassfish4x</cargo.payara.container_id>
-		<cargo.payara.download_uri>
-			https://repo1.maven.org/maven2/fish/payara/distributions/payara/4.1.2.181/payara-4.1.2.181.zip
-		</cargo.payara.download_uri>
-
 		<!-- Application properties -->
 		<webapp.databaseTempDir>/tmp</webapp.databaseTempDir>
-		<!-- the following configuration works in jboss eap when spec-descriptor-property-replacement is true, in such a way the endpoint can be configured via environment variables -->
+		<!-- Default URL for OCP deployment (ROOT.war at root context /).
+		     spec-descriptor-property-replacement=true allows CARGO_ENDPOINT to be resolved at runtime.
+		     For local EAP deployment use the eap-local profile. -->
 		<webapp.graphTraversalUrl>
-			${env.CARGO_ENDPOINT:http://localhost:8080}/cargo-tracker/rest/graph-traversal/shortest-path
+			${env.CARGO_ENDPOINT:http://localhost:8080}/rest/graph-traversal/shortest-path
 		</webapp.graphTraversalUrl>
 		<!-- default jboss datasource naming convention -->
 		<datasource.jndi>java:/jdbc/CargoTrackerDatabase</datasource.jndi>
@@ -215,84 +210,16 @@
 	</build>
 	<profiles>
 		<profile>
-			<id>payara</id>
+			<id>eap-local</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
 			</activation>
 			<properties>
-                <payara.version>6.2023.12</payara.version>
-				<!-- Application properties -->
+				<!-- For local EAP 8.1 deployment the WAR is cargo-tracker.war, so context is /cargo-tracker -->
 				<webapp.graphTraversalUrl>
-					http://localhost:8080/cargo-tracker/rest/graph-traversal/shortest-path</webapp.graphTraversalUrl>
-				<db.driverClass>org.h2.jdbcx.JdbcDataSource</db.driverClass>
-				<!-- H2 file engine requires an absolute path, eg. ~/name, ./name or a full-qualified 
-					path name (it should include driver name under Windows). -->
-				<db.jdbcUrl>jdbc:h2:file:./cargo-tracker-data/cargo-tracker-database;create=true</db.jdbcUrl>
-				<db.user />
-				<db.password />
-				<datasource.jndi>java:app/jdbc/CargoTrackerDatabase</datasource.jndi>
+					http://localhost:8080/cargo-tracker/rest/graph-traversal/shortest-path
+				</webapp.graphTraversalUrl>
 			</properties>
-			<dependencies>
-				<!-- We need a Jersey specific dependency for property name constants -->
-                <dependency>
-                    <groupId>org.glassfish.jersey.core</groupId>
-                    <artifactId>jersey-server</artifactId>
-                    <version>3.1.2</version>
-                    <scope>provided</scope>
-                </dependency>
-				<!-- Embedding the JDBC driver in the WAR works in GlassFish -->
-                <dependency>
-                    <groupId>com.h2database</groupId>
-                    <artifactId>h2</artifactId>
-                    <version>2.1.214</version>
-                    <scope>runtime</scope>
-                </dependency>
-                <dependency>
-                    <groupId>fish.payara.extras</groupId>
-                    <artifactId>payara-micro</artifactId>
-                    <version>${payara.version}</version>
-                    <scope>test</scope>
-                </dependency>
-				<!-- Payara Micro Managed Container Adapter -->
-                <dependency>
-                    <groupId>fish.payara.arquillian</groupId>
-                    <artifactId>arquillian-payara-micro-managed</artifactId>
-                    <version>3.0.alpha8</version>
-                    <scope>test</scope>
-                </dependency>
-				<!-- Needed at the moment for Jakarta EE 10 support -->
-                <dependency>
-                    <groupId>fish.payara.arquillian</groupId>
-                    <artifactId>payara-client-ee9</artifactId>
-                    <version>3.0.alpha8</version>
-                    <scope>test</scope>
-                </dependency>
-			</dependencies>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>3.1.2</version>
-					</plugin>
-					<plugin>
-						<groupId>org.codehaus.cargo</groupId>
-						<artifactId>cargo-maven3-plugin</artifactId>
-						<version>1.10.9</version>
-						<configuration>
-							<container>
-								<containerId>payara</containerId>
-								<artifactInstaller>
-									<groupId>fish.payara.distributions</groupId>
-									<artifactId>payara</artifactId>
-									<version>${payara.version}</version>
-								</artifactInstaller>
-								<timeout>180000</timeout>
-							</container>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 	</profiles>
 </project>
