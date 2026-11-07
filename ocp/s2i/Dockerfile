@@ -23,8 +23,8 @@ FROM registry.redhat.io/jboss-eap-8/eap8-openjdk17-runtime-openshift-rhel8:lates
 # Copy the provisioned server from the builder stage
 COPY --from=builder --chown=jboss:root $JBOSS_HOME $JBOSS_HOME
 
-# Copy the application WAR and PostgreSQL driver module
-COPY --chown=jboss:root modules/ $JBOSS_HOME/modules/
+# Copy the application WAR
+# The PostgreSQL driver module is installed by Galleon (postgresql-driver layer)
 COPY --chown=jboss:root deployments/*.war $JBOSS_HOME/standalone/deployments
 
 # Ensure correct permissions
