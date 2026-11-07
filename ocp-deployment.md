@@ -49,7 +49,7 @@ Deploy all resources (Deployment, Service, Route, PostgreSQL, ConfigMaps, Secret
 
 Open the application in your web browser:
 
-    open "http://$(oc get route cargo-tracker --template='{{ .spec.host }}')/cargo-tracker"
+    open "https://$(oc get route cargo-tracker --template='{{ .spec.host }}')/cargo-tracker"
 
 ## Documentation References
 
