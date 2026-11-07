@@ -1,14 +1,14 @@
-# Migration Guide — JBoss EAP 7 to JBoss EAP 8.1
+# Migration Guide  - JBoss EAP 7 to JBoss EAP 8.1
 
 Step-by-step log of the migration process: which changes were automated by MTA and which were applied manually.
 
 For MTA installation and usage instructions, refer to the official documentation:
-- **"Installing the migration toolkit for applications"** — Red Hat Customer Portal
-- **"Using the migration toolkit for applications command-line interface"** — Red Hat Customer Portal
+- **"Installing the migration toolkit for applications"**  - Red Hat Customer Portal
+- **"Using the migration toolkit for applications command-line interface"**  - Red Hat Customer Portal
 
 ---
 
-## Step 1 — Analyze with MTA
+## Step 1  - Analyze with MTA
 
 Before making any changes, the application was analyzed using `mta-cli analyze` to identify all migration issues.
 
@@ -38,13 +38,13 @@ The full MTA report is available in the [`mta-report/`](mta-report/index.html) d
 
 ---
 
-## Step 2 — Automated changes
+## Step 2  - Automated changes
 
 The MTA CLI provides the `openrewrite` command to transform source code automatically, documented in
-**Chapter 8 — "Performing a transformation with the MTA command-line interface"**
+**Chapter 8  - "Performing a transformation with the MTA command-line interface"**
 of *"Using the migration toolkit for applications command-line interface"*.
 
-> **Note — MTA 8.3.3:** `mta-cli openrewrite` is marked **deprecated** in this version. Recipe names differ from the printed documentation — use the names listed below (`jakarta-imports`, `jakarta-xml`, `eap8-xml`).
+> **Note  - MTA 8.3.3:** `mta-cli openrewrite` is marked **deprecated** in this version. Recipe names differ from the printed documentation  - use the names listed below (`jakarta-imports`, `jakarta-xml`, `eap8-xml`).
 
 > **Container runtime requirement:** The `openrewrite` command always uses a container internally (Podman must be installed and configured). The MTA 8.3.3 container image (`mta-cli-rhel9:8.3.3`) has a known issue: the directory `/tmp/source-app` inside the image is pre-created with root ownership and mode 755. When the command runs as a non-root user, the container cannot write there and silently fails (exits 0 but makes no changes). The workaround is to run `mta-cli openrewrite` as root using `sudo`, with environment variables explicitly forwarded:
 
@@ -59,7 +59,7 @@ sudo HOME=/home/<user> \
      --goal=run
 ```
 
-Run once per recipe — repeat with `--target=jakarta-xml` and `--target=eap8-xml`.
+Run once per recipe  - repeat with `--target=jakarta-xml` and `--target=eap8-xml`.
 
 The changes described below are already applied in this branch and serve as a reference log of what each recipe does, validated on RHEL 9 Linux ARM64.
 
@@ -79,7 +79,7 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 ```
 
-Dependencies updated in `pom.xml` (existing `javax` coords replaced — recipe does **not** add new dependencies):
+Dependencies updated in `pom.xml` (existing `javax` coords replaced  - recipe does **not** add new dependencies):
 
 ```
 jakarta.annotation-api, jakarta.inject-api, jakarta.jms-api,
@@ -125,7 +125,7 @@ After:
 
 ---
 
-## Step 3 — Manual changes
+## Step 3  - Manual changes
 
 The following changes were not automated by MTA and were applied manually.
 
@@ -190,7 +190,7 @@ The UI theme was also changed from `omega` (retired in Primefaces 12) to `saga`.
 
 ### CDI descriptor (beans.xml)
 
-Updated to Jakarta EE 3.0 namespace. The `bean-discovery-mode="all"` attribute is now **required** — CDI 4.0 changed the default from `all` to `annotated`, which is a silent breaking change:
+Updated to Jakarta EE 3.0 namespace. The `bean-discovery-mode="all"` attribute is now **required**  - CDI 4.0 changed the default from `all` to `annotated`, which is a silent breaking change:
 
 ```xml
 <beans xmlns="https://jakarta.ee/xml/ns/jakartaee"
@@ -245,5 +245,5 @@ mta-cli analyze \
   --overwrite
 ```
 
-Result: **1 incident** — `javax.sql.DataSource` (confirmed false positive, not to be changed).
+Result: **1 incident**  - `javax.sql.DataSource` (confirmed false positive, not to be changed).
 All 319 original incidents were resolved.

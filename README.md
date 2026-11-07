@@ -15,9 +15,9 @@ See [MIGRATION.md](MIGRATION.md) for the complete step-by-step migration log, in
 - XML deployment descriptors updated to Jakarta EE namespaces
 - Maven dependencies updated: `javax` groupId replaced by `jakarta.platform`; Red Hat EAP 8 BOM introduced
 - Primefaces upgraded from `8.0` to `12.0.0` with classifier `jakarta`; theme changed from `omega` to `saga`
-- `beans.xml` updated to Jakarta EE 3.0 namespace with `bean-discovery-mode="all"` (required — CDI 4.0 changed the default)
+- `beans.xml` updated to Jakarta EE 3.0 namespace with `bean-discovery-mode="all"` (required  - CDI 4.0 changed the default)
 - `faces-config.xml` updated to Jakarta Faces 4.0
-- `@PrivateOwned` (EclipseLink-specific) removed — no equivalent in Hibernate
+- `@PrivateOwned` (EclipseLink-specific) removed  - no equivalent in Hibernate
 - Hibernate implicit naming strategy for sequences/tables updated
 - Database changed from H2 in-memory to **PostgreSQL**
 
@@ -149,5 +149,5 @@ by simply digging into the code to see how things are implemented.
 ## Known Issues
 
 * **Red Hat Maven repository required:** The EAP 8 BOM (`org.jboss.bom:jboss-eap-ee-with-tools`) is not published to Maven Central. The build will fail without access to `https://maven.repository.redhat.com/ga/`.
-* **`javax.sql.DataSource` in web.xml:** The MTA analysis flags `javax.sql.DataSource` as a migration issue, but this is a false positive — `javax.sql` is part of the Java SE standard and was not moved to the `jakarta` namespace. It must not be changed.
+* **`javax.sql.DataSource` in web.xml:** The MTA analysis flags `javax.sql.DataSource` as a migration issue, but this is a false positive  - `javax.sql` is part of the Java SE standard and was not moved to the `jakarta` namespace. It must not be changed.
 * **Data is wiped on restart:** The application uses a PostgreSQL database. All data is preserved between restarts, but the schema is recreated if the database is empty.
