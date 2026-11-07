@@ -3,6 +3,13 @@
 > **This branch (`jee7-eap7`) has been adapted to run on JBoss EAP 7.4 with Java 11.**
 > The original application targets Payara/Glassfish with Java 8 — see the [`javaee7`](https://github.com/marcelomrwin/rh-cargotracker/tree/javaee7) branch for that version.
 
+## MTA Analysis
+
+This branch includes an MTA (Migration Toolkit for Applications) analysis report identifying the changes required to migrate this application from EAP 7 to EAP 8.
+
+- [View the MTA analysis report](mta-report/index.html)
+- [MTA analysis procedure and results summary](MTA-ANALYSIS.md)
+
 ## Running on JBoss EAP 7.4
 
 ### Prerequisites
