@@ -40,6 +40,10 @@ mvn clean package -DskipTests
 
 The WAR file will be generated at `target/cargo-tracker.war`.
 
+## OpenShift Cloud Readiness
+
+Before deploying to OpenShift, MTA was used to assess cloud readiness. See [OCP-READINESS.md](OCP-READINESS.md) for the full analysis and [ocp-mta-report/index.html](ocp-mta-report/index.html) for the HTML report.
+
 ## Deploy on OpenShift
 
 This branch includes Kubernetes/OpenShift manifests and an S2I Dockerfile for containerized deployment.
