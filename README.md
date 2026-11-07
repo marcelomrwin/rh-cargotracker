@@ -19,14 +19,16 @@ See [MIGRATION.md](MIGRATION.md) for the complete step-by-step migration log, in
 - `faces-config.xml` updated to Jakarta Faces 4.0
 - `@PrivateOwned` (EclipseLink-specific) removed  - no equivalent in Hibernate
 - Hibernate implicit naming strategy for sequences/tables updated
-- Database changed from H2 in-memory to **PostgreSQL**
+- Database changed from H2 in-memory to **PostgreSQL** for OpenShift deployment; H2 in-memory remains usable for local testing (see Prerequisites below)
 
 ## Prerequisites
 
 - Java 17 (`JAVA_HOME` must point to a Java 17 JDK)
 - Maven 3.6+
 - Access to the Red Hat Maven repository (required for the EAP 8 BOM): `https://maven.repository.redhat.com/ga/`
-- JBoss EAP 8.1 and a PostgreSQL instance (to run locally)
+- JBoss EAP 8.1
+- For local testing: H2 datasource configured in EAP 8.1 via `jboss-cli.sh` (same approach as `jee7-eap7`, using `standalone-full.xml`)
+- For OpenShift deployment: a PostgreSQL instance (see [ocp-deployment.md](ocp-deployment.md))
 
 ## Build
 
