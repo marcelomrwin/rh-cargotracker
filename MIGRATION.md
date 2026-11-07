@@ -1,8 +1,6 @@
 # Migration Guide — JBoss EAP 7 to JBoss EAP 8.1
 
-This document describes the migration of the Cargo Tracker application from JBoss EAP 7.4 (branch [`jee7-eap7`](https://github.com/marcelomrwin/rh-cargotracker/tree/jee7-eap7)) to JBoss EAP 8.1 / Jakarta EE 10 (this branch).
-
-The migration was performed with the assistance of the **MTA (Migration Toolkit for Applications)** CLI, which identified the required changes and automated part of them.
+Step-by-step log of the migration process: which changes were automated by MTA and which were applied manually.
 
 For MTA installation and usage instructions, refer to the official documentation:
 - **"Installing the migration toolkit for applications"** — Red Hat Customer Portal
@@ -120,8 +118,6 @@ The Red Hat EAP 8 BOM was introduced to manage Jakarta dependency versions:
 </dependencyManagement>
 ```
 
-> **Note:** This BOM is available from the Red Hat Maven GA repository (`https://maven.repository.redhat.com/ga/`), not from Maven Central.
-
 Additional Jakarta dependencies added manually:
 
 ```
@@ -198,10 +194,6 @@ The batch job XML namespace was updated to Jakarta version:
 ### @PrivateOwned removal
 
 The `@PrivateOwned` annotation (EclipseLink-specific) was removed. It has no equivalent in Hibernate (the JPA provider used by EAP 8) and has no functional side effects in this application.
-
-### javax.sql.DataSource — do NOT change
-
-The MTA analysis flags `javax.sql.DataSource` in `web.xml` as a migration issue. This is a **false positive** — `javax.sql` is part of the Java SE standard (JDBC API) and was **not** moved to the `jakarta` namespace. This reference must remain as `javax.sql.DataSource`.
 
 ---
 
