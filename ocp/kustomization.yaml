@@ -21,7 +21,7 @@ configMapGenerator:
 - name: cargo-tracker-env
   literals:
   - JGROUPS_PING_PROTOCOL=kubernetes.KUBE_PING
-  - KUBERNETES_NAMESPACE=cargo-tracker-prj
+  - KUBERNETES_NAMESPACE=cargo-tracker-eap8
   - KUBERNETES_LABELS=app=cargo-tracker
   - CARGO_ENDPOINT=http://cargo-tracker:8080
   - POSTGRESQL_JNDI=java:/jdbc/CargoTrackerDatabase
