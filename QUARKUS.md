@@ -32,13 +32,14 @@ mta-cli rules list-targets | grep -i quarkus
 
 ```shell
 mta-cli analyze \
-  --input <path_to_cargo-tracker.war_or_source> \
+  --input <path_to_cargo-tracker.war> \
   --output <path_to_output> \
-  --source eap8 \
   --target quarkus \
   --run-local=false \
   --overwrite
 ```
+
+> **Note:** Do not specify `--source eap8` - the Quarkus ruleset targets any Java EE application regardless of source platform.
 
 The MTA report identifies which APIs and patterns need to be replaced and provides guidance for each incident.
 
@@ -87,6 +88,22 @@ Based on Red Hat's production experience migrating Java EE applications to Quark
 
 ## MTA Analysis Report
 
-<!-- TO BE FILLED AFTER RUNNING THE ANALYSIS -->
+The analysis of `cargo-tracker.war` identified **13 incidents** across 1 ruleset:
 
-The MTA report for this analysis will be available in [`quarkus-mta-report/`](quarkus-mta-report/index.html).
+| Incidents | Rule | Description |
+|----------:|------|-------------|
+| 1 | `jakarta-cdi-to-quarkus-00000` | Replace `jakarta.enterprise:jakarta.enterprise.cdi-api` dependency |
+| 1 | `jakarta-cdi-to-quarkus-00020` | Replace `jakarta.inject:jakarta.inject-api` dependency |
+| 1 | `jakarta-cdi-to-quarkus-00030` | `beans.xml` descriptor content is ignored by Quarkus |
+| 1 | `jakarta-faces-to-quarkus-00000` | Replace Jakarta Faces dependency with MyFaces |
+| 1 | `javaee-pom-to-quarkus-00000` | Project artifact extension must be `jar` (not `war`) |
+| 1 | `javaee-pom-to-quarkus-00010` | Adopt Quarkus BOM |
+| 1 | `javaee-pom-to-quarkus-00020` | Adopt Quarkus Maven plugin |
+| 1 | `javaee-pom-to-quarkus-00030` | Adopt Maven Compiler plugin configuration |
+| 1 | `javaee-pom-to-quarkus-00040` | Adopt Maven Surefire plugin |
+| 1 | `javaee-pom-to-quarkus-00050` | Adopt Maven Failsafe plugin |
+| 1 | `javaee-pom-to-quarkus-00060` | Add Maven profile for native build |
+| 1 | `javaee-pom-to-quarkus-00070` | Configure Quarkus hibernate-orm extension |
+| 1 | `persistence-to-quarkus-00000` | Move persistence configuration to `application.properties` |
+
+The full interactive report is available in [`quarkus-mta-report/`](quarkus-mta-report/index.html).
