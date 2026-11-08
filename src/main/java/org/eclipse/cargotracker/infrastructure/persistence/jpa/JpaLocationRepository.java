@@ -4,8 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+
 
 import org.eclipse.cargotracker.domain.model.location.Location;
 import org.eclipse.cargotracker.domain.model.location.LocationRepository;
@@ -16,7 +17,7 @@ public class JpaLocationRepository implements LocationRepository, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@PersistenceContext
+	@Inject
 	private EntityManager entityManager;
 
 	@Override

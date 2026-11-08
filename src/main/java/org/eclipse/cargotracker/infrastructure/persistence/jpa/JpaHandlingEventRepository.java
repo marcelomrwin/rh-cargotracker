@@ -3,8 +3,9 @@ package org.eclipse.cargotracker.infrastructure.persistence.jpa;
 import java.io.Serializable;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+
 
 import org.eclipse.cargotracker.domain.model.cargo.TrackingId;
 import org.eclipse.cargotracker.domain.model.handling.HandlingEvent;
@@ -16,7 +17,7 @@ public class JpaHandlingEventRepository implements HandlingEventRepository, Seri
 
 	private static final long serialVersionUID = 1L;
 
-	@PersistenceContext
+	@Inject
 	private EntityManager entityManager;
 
 	@Override

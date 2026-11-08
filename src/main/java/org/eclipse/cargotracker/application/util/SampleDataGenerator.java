@@ -11,7 +11,7 @@ import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+
 
 import jakarta.annotation.PostConstruct;
 import org.eclipse.cargotracker.domain.model.cargo.Cargo;
@@ -38,7 +38,7 @@ public class SampleDataGenerator {
 	@Inject
 	private Logger logger;
 
-	@PersistenceContext
+	@Inject
 	private EntityManager entityManager;
 	@Inject
 	private HandlingEventFactory handlingEventFactory;

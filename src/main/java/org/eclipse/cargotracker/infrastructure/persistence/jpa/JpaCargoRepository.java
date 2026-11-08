@@ -10,7 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceContext;
+
 
 import org.eclipse.cargotracker.domain.model.cargo.Cargo;
 import org.eclipse.cargotracker.domain.model.cargo.CargoRepository;
@@ -25,7 +25,7 @@ public class JpaCargoRepository implements CargoRepository, Serializable {
     @Inject
     private Logger logger;
 
-	@PersistenceContext
+	@Inject
 	private EntityManager entityManager;
 
 	@Override
