@@ -6,7 +6,7 @@
 	<groupId>org.eclipse.ee4j</groupId>
 	<artifactId>cargo-tracker</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>quarkus</packaging>
 	<name>Eclipse Cargo Tracker</name>
 	<description>
         The project demonstrates how you can develop applications with the Jakarta EE platform using widely
@@ -26,121 +26,107 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.release>17</maven.compiler.release>
+		<maven.compiler.parameters>true</maven.compiler.parameters>
 
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
-        <version.server.bom>8.1.9.GA-redhat-00006</version.server.bom>
+		<!-- Quarkus platform -->
+		<quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+		<quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+		<quarkus.platform.version>3.40.1.1</quarkus.platform.version>
 
-		<!-- Arquillian properties -->
-		<arquillian.core.version>1.4.1.Final</arquillian.core.version>
+		<!-- Plugin versions (from quarkus-quickstarts getting-started) -->
+		<compiler-plugin.version>3.15.0</compiler-plugin.version>
+		<surefire-plugin.version>3.5.4</surefire-plugin.version>
+
+		<!-- Quarkus Artemis JMS (from jms-quickstart) -->
+		<quarkus-artemis.version>3.14.3</quarkus-artemis.version>
+
 		<skipTests>true</skipTests>
-
-		<!-- Application properties -->
-		<webapp.databaseTempDir>/tmp</webapp.databaseTempDir>
-		<!-- Default URL for OCP deployment (ROOT.war at root context /).
-		     spec-descriptor-property-replacement=true allows CARGO_ENDPOINT to be resolved at runtime.
-		     For local EAP deployment use the eap-local profile. -->
-		<webapp.graphTraversalUrl>
-			${env.CARGO_ENDPOINT:http://localhost:8080}/rest/graph-traversal/shortest-path
-		</webapp.graphTraversalUrl>
-		<!-- default jboss datasource naming convention -->
-		<datasource.jndi>java:/jdbc/CargoTrackerDatabase</datasource.jndi>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
-            <dependency>
-                <groupId>org.jboss.bom</groupId>
-                <artifactId>jboss-eap-ee-with-tools</artifactId>
-                <version>${version.server.bom}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+			<dependency>
+				<groupId>${quarkus.platform.group-id}</groupId>
+				<artifactId>${quarkus.platform.artifact-id}</artifactId>
+				<version>${quarkus.platform.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- JMS support via Artemis (from jms-quickstart) -->
+			<dependency>
+				<groupId>io.quarkiverse.artemis</groupId>
+				<artifactId>quarkus-artemis-bom</artifactId>
+				<version>${quarkus-artemis.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<dependencies>
 
-		<!-- Jakarta EE API v10 - mta generated -->
+		<!-- CDI (from getting-started quickstart) -->
 		<dependency>
-			<groupId>jakarta.annotation</groupId>
-			<artifactId>jakarta.annotation-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.inject</groupId>
-			<artifactId>jakarta.inject-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.jms</groupId>
-			<artifactId>jakarta.jms-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.json</groupId>
-			<artifactId>jakarta.json-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.persistence</groupId>
-			<artifactId>jakarta.persistence-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.transaction</groupId>
-			<artifactId>jakarta.transaction-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.websocket</groupId>
-			<artifactId>jakarta.websocket-api</artifactId>
-			<scope>provided</scope>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-arc</artifactId>
 		</dependency>
 
-		<!-- Jakarta EE API v10 -->
+		<!-- REST (from hibernate-orm-quickstart) -->
 		<dependency>
-			<groupId>jakarta.ejb</groupId>
-			<artifactId>jakarta.ejb-api</artifactId>
-			<scope>provided</scope>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-rest</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>jakarta.enterprise</groupId>
-			<artifactId>jakarta.enterprise.cdi-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.websocket</groupId>
-			<artifactId>jakarta.websocket-client-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.faces</groupId>
-			<artifactId>jakarta.faces-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.batch</groupId>
-			<artifactId>jakarta.batch-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.validation</groupId>
-			<artifactId>jakarta.validation-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.ws.rs</groupId>
-			<artifactId>jakarta.ws.rs-api</artifactId>
-			<scope>provided</scope>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-rest-jackson</artifactId>
 		</dependency>
 
-		<!-- The third-party dependencies this application has -->
+		<!-- JPA / Hibernate (from hibernate-orm-quickstart) -->
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-hibernate-orm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-agroal</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-jdbc-postgresql</artifactId>
+		</dependency>
+
+		<!-- Bean Validation -->
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-hibernate-validator</artifactId>
+		</dependency>
+
+		<!-- JMS via Artemis (from jms-quickstart) -->
+		<dependency>
+			<groupId>io.quarkiverse.artemis</groupId>
+			<artifactId>quarkus-artemis-jms</artifactId>
+		</dependency>
+
+		<!-- WebSocket (from websockets-quickstart) -->
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-websockets</artifactId>
+		</dependency>
+
+		<!-- Scheduler - replaces @Schedule EJB timer -->
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-scheduler</artifactId>
+		</dependency>
+
+		<!-- REST client - for ExternalRoutingService -->
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-rest-client</artifactId>
+		</dependency>
+
+		<!-- Third-party utilities -->
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
@@ -150,76 +136,83 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.4</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.primefaces</groupId>
-			<artifactId>primefaces</artifactId>
-			<version>12.0.0</version>
-			<classifier>jakarta</classifier>
 		</dependency>
 
-		<!-- Test dependencies -->
+		<!-- Test -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.1</version>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Arquillian dependencies -->
-		<dependency>
-			<groupId>org.jboss.arquillian.junit</groupId>
-			<artifactId>arquillian-junit-container</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- Resolvers are needed in the Arquillian tests. This is used for adding 
-			all the runtime dependencies inside a testing war. -->
-		<dependency>
-			<groupId>org.jboss.shrinkwrap.resolver</groupId>
-			<artifactId>shrinkwrap-resolver-impl-maven</artifactId>
-			<version>3.3.7</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
-		<finalName>cargo-tracker</finalName>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>3.4.0</version>
+				<groupId>${quarkus.platform.group-id}</groupId>
+				<artifactId>quarkus-maven-plugin</artifactId>
+				<version>${quarkus.platform.version}</version>
+				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${compiler-plugin.version}</version>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${surefire-plugin.version}</version>
 				<configuration>
-					<webResources>
-						<resource>
-							<directory>src/main/webapp</directory>
-							<filtering>true</filtering>
-						</resource>
-					</webResources>
+					<systemPropertyVariables>
+						<java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+						<maven.home>${maven.home}</maven.home>
+					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+
+	<!-- Native build profile (from getting-started quickstart) -->
 	<profiles>
 		<profile>
-			<id>eap-local</id>
+			<id>native</id>
 			<activation>
-				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>native</name>
+				</property>
 			</activation>
 			<properties>
-				<!-- For local EAP 8.1 deployment the WAR is cargo-tracker.war, so context is /cargo-tracker -->
-				<webapp.graphTraversalUrl>
-					http://localhost:8080/cargo-tracker/rest/graph-traversal/shortest-path
-				</webapp.graphTraversalUrl>
+				<quarkus.native.enabled>true</quarkus.native.enabled>
+				<quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
 			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<version>${surefire-plugin.version}</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>integration-test</goal>
+									<goal>verify</goal>
+								</goals>
+								<configuration>
+									<systemPropertyVariables>
+										<native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+										<java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+										<maven.home>${maven.home}</maven.home>
+									</systemPropertyVariables>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 </project>

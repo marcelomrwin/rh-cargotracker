@@ -1,12 +1,12 @@
-# Eclipse Cargo Tracker - Applied Domain-Driven Design Blueprints for Jakarta EE
+# Eclipse Cargo Tracker - Migrating to Quarkus
 
-> **This branch (`jakartaee10-eap8`) has been migrated to run on JBoss EAP 8.1 with Java 17 and Jakarta EE 10.**
-> This is the result of migrating the [`jee7-eap7`](https://github.com/marcelomrwin/rh-cargotracker/tree/jee7-eap7) branch using the [MTA (Migration Toolkit for Applications)](https://developers.redhat.com/products/mta).
+> **This branch (`quarkus`) is the Quarkus migration of the Cargo Tracker application.**
+> Starting point: [`jakartaee10-eap8`](https://github.com/marcelomrwin/rh-cargotracker/tree/jakartaee10-eap8) (EAP 8.1 / Jakarta EE 10 running on OpenShift).
+> Target: **Quarkus 3.40.1.1** — cloud-native, no application server required.
 
 ## Migration log
 
-This branch is the result of migrating the [`jee7-eap7`](https://github.com/marcelomrwin/rh-cargotracker/tree/jee7-eap7) branch using MTA.
-See [MIGRATION.md](MIGRATION.md) for the complete step-by-step migration log, including which changes were automated by MTA and which were manual.
+See [QUARKUS.md](QUARKUS.md) for the complete migration plan, MTA analysis results, effort estimates per area, and step-by-step implementation log.
 
 ## What changed from jee7-eap7
 
