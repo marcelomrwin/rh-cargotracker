@@ -162,7 +162,8 @@
         function init () {
         	// TODO [DDD] This extra invocation really isn't necessary. We should get all the
         	// necessary data from the Cargo view adapter.
-            fetch('#{request.contextPath}/rest/cargo')
+            const ctxPath = window.location.pathname.split('/admin/')[0];
+            fetch(ctxPath + '/rest/cargo')
                 .then(response => response.json())
                 .then(cargos => {
                 const coordinates = [];
@@ -204,7 +205,7 @@
                 // show the scale bar on the lower left corner
                 L.control.scale().addTo(map);
 
-                const contextPath = "#{request.contextPath}";
+                const contextPath = window.location.pathname.split('/admin/')[0];
                 const trackingBaseUri = window.location.protocol + "//" + document.location.host + contextPath + "/admin/show.xhtml?trackingId=";
                 const winHeight = window.innerHeight;
                 const winWidth = window.innerWidth;
@@ -234,7 +235,7 @@
     </script>
     <script type="text/javascript">
         window.onload = function () {
-            const contextPath = "#{request.contextPath}";
+            const contextPath = window.location.pathname.split('/admin/')[0];
             const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
             const socketUri = wsProtocol + document.location.host + contextPath + "/tracking";
             const socket = new WebSocket(socketUri);
