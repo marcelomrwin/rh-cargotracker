@@ -204,8 +204,8 @@
                 // show the scale bar on the lower left corner
                 L.control.scale().addTo(map);
 
-                const applicationPath = window.location.pathname.split('/')[1];
-                const trackingBaseUri = "http://" + document.location.host + "/" + applicationPath + "/admin/show.xhtml?trackingId=";
+                const contextPath = "#{request.contextPath}";
+                const trackingBaseUri = window.location.protocol + "//" + document.location.host + contextPath + "/admin/show.xhtml?trackingId=";
                 const winHeight = window.innerHeight;
                 const winWidth = window.innerWidth;
                 const winDimensions = "height=" + winHeight + ",width=" + winWidth;
@@ -234,8 +234,9 @@
     </script>
     <script type="text/javascript">
         window.onload = function () {
-            const applicationPath = window.location.pathname.split('/')[1];
-            const socketUri = "ws://" + document.location.host + "/" + applicationPath + "/tracking";
+            const contextPath = "#{request.contextPath}";
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+            const socketUri = wsProtocol + document.location.host + contextPath + "/tracking";
             const socket = new WebSocket(socketUri);
 
             const status = document.getElementById("status");
