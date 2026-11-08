@@ -1,7 +1,9 @@
 package org.eclipse.cargotracker.infrastructure.messaging.jms;
 
-import jakarta.ejb.ActivationConfigProperty;
-import jakarta.ejb.MessageDriven;
+import jakarta.enterprise.context.ApplicationScoped;
+
+
+
 import jakarta.inject.Inject;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
@@ -16,9 +18,9 @@ import org.eclipse.cargotracker.interfaces.handling.HandlingEventRegistrationAtt
  * Consumes handling event registration attempt messages and delegates to proper
  * registration.
  */
-@MessageDriven(activationConfig = {
-		@ActivationConfigProperty(propertyName = "destinationType", propertyValue = "jakarta.jms.Queue"),
-		@ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "java:app/jms/HandlingEventRegistrationAttemptQueue") })
+// TODO Step 5: wire JMS via ConnectionFactory (jms-quickstart pattern)
+@ApplicationScoped
+
 public class HandlingEventRegistrationAttemptConsumer implements MessageListener {
 
 	@Inject

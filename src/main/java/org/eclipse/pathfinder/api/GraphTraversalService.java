@@ -6,7 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import jakarta.ejb.Stateless;
+
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,7 +18,7 @@ import jakarta.ws.rs.QueryParam;
 
 import org.eclipse.pathfinder.internal.GraphDao;
 
-@Stateless
+@ApplicationScoped
 @Path("/graph-traversal")
 public class GraphTraversalService {
 

@@ -102,6 +102,12 @@
 			<artifactId>quarkus-hibernate-validator</artifactId>
 		</dependency>
 
+		<!-- Transaction support - provides @Transactional (replaces implicit EJB transactions) -->
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-narayana-jta</artifactId>
+		</dependency>
+
 		<!-- JMS via Artemis (from jms-quickstart) -->
 		<dependency>
 			<groupId>io.quarkiverse.artemis</groupId>

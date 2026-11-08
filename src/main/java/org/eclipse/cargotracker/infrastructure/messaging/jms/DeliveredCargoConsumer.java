@@ -1,18 +1,20 @@
 package org.eclipse.cargotracker.infrastructure.messaging.jms;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import jakarta.ejb.ActivationConfigProperty;
-import jakarta.ejb.MessageDriven;
+
+
 import jakarta.inject.Inject;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.MessageListener;
 
-@MessageDriven(activationConfig = {
-		@ActivationConfigProperty(propertyName = "destinationType", propertyValue = "jakarta.jms.Queue"),
-		@ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "java:app/jms/DeliveredCargoQueue") })
+// TODO Step 5: wire JMS via ConnectionFactory (jms-quickstart pattern)
+@ApplicationScoped
+
 public class DeliveredCargoConsumer implements MessageListener {
 
     @Inject

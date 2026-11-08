@@ -3,8 +3,9 @@ package org.eclipse.cargotracker.application.internal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import jakarta.ejb.Stateless;
+
 import jakarta.enterprise.event.Event;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.eclipse.cargotracker.application.ApplicationEvents;
@@ -17,7 +18,7 @@ import org.eclipse.cargotracker.domain.model.handling.HandlingHistory;
 import org.eclipse.cargotracker.infrastructure.events.cdi.CargoInspected;
 
 //TODO [Jakarta EE 8] Adopt the Date-Time API.
-@Stateless
+@ApplicationScoped
 public class DefaultCargoInspectionService implements CargoInspectionService {
 
 	@Inject

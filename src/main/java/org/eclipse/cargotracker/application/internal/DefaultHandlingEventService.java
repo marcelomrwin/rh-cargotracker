@@ -3,7 +3,8 @@ package org.eclipse.cargotracker.application.internal;
 import java.util.Date;
 import java.util.logging.Logger;
 
-import jakarta.ejb.Stateless;
+
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.eclipse.cargotracker.application.ApplicationEvents;
@@ -17,7 +18,7 @@ import org.eclipse.cargotracker.domain.model.location.UnLocode;
 import org.eclipse.cargotracker.domain.model.voyage.VoyageNumber;
 
 // TODO [Jakarta EE 8] Adopt the Date-Time API.
-@Stateless
+@ApplicationScoped
 public class DefaultHandlingEventService implements HandlingEventService {
 
 	@Inject

@@ -5,15 +5,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import jakarta.ejb.Singleton;
-import jakarta.ejb.Startup;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.transaction.Transactional;
+import io.quarkus.runtime.StartupEvent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
 
-import jakarta.annotation.PostConstruct;
 import org.eclipse.cargotracker.domain.model.cargo.Cargo;
 import org.eclipse.cargotracker.domain.model.cargo.Itinerary;
 import org.eclipse.cargotracker.domain.model.cargo.Leg;
@@ -31,8 +30,7 @@ import org.joda.time.LocalDate;
 /**
  * Loads sample data for demo.
  */
-@Singleton
-@Startup
+@ApplicationScoped
 public class SampleDataGenerator {
 
 	@Inject
@@ -45,9 +43,8 @@ public class SampleDataGenerator {
 	@Inject
 	private HandlingEventRepository handlingEventRepository;
 
-	@PostConstruct
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public void loadSampleData() {
+	@Transactional
+	void onStart(@Observes StartupEvent ev) {
 		logger.info("Loading sample data.");
 		unLoadAll(); // Fail-safe in case of application restart that does not trigger a JPA schema
 						// drop.

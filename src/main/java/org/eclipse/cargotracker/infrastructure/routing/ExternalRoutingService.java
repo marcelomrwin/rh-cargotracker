@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import jakarta.ejb.Stateless;
+
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -31,7 +32,7 @@ import org.eclipse.pathfinder.api.TransitPath;
  * layer between our domain model and the API put forward by the routing team,
  * which operates in a different context from us.
  */
-@Stateless
+@ApplicationScoped
 public class ExternalRoutingService implements RoutingService {
 
 	@Inject

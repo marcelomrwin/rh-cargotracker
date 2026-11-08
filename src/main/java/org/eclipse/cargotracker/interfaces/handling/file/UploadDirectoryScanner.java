@@ -1,23 +1,26 @@
 package org.eclipse.cargotracker.interfaces.handling.file;
 
-import jakarta.batch.operations.JobOperator;
-import jakarta.batch.runtime.BatchRuntime;
-import jakarta.ejb.Schedule;
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.scheduler.Scheduled;
 
 /**
  * Periodically scans a certain directory for files and attempts to parse
- * handling event registrations from the contents by calling a batch job.
+ * handling event registrations from the contents.
  * <p/>
- * Files that fail to parse are moved into a separate directory, successful
- * files are deleted.
+ * Note: Jakarta Batch is not supported in Quarkus. The batch job
+ * (EventFilesProcessorJob) will be replaced with a custom file processor
+ * in a later step. The scheduling is handled by Quarkus Scheduler
+ * (@Scheduled) which replaces the EJB @Schedule annotation.
+ * Reference: https://quarkus.io/guides/scheduler
  */
-@Stateless
+@ApplicationScoped
 public class UploadDirectoryScanner {
 
-	@Schedule(minute = "*/2", hour = "*") // Runs every fifteen minutes
+	// TODO Step 7: replace Jakarta Batch with Quartz/custom file processor
+	// Original: @Schedule(minute="*/2", hour="*") with BatchRuntime.getJobOperator()
+	@Scheduled(every = "2m")
 	public void processFiles() {
-		JobOperator jobOperator = BatchRuntime.getJobOperator();
-		jobOperator.start("EventFilesProcessorJob", null);
+		// TODO: implement file processing without Jakarta Batch
 	}
 }
