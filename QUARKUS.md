@@ -34,9 +34,13 @@ mta-cli analyze \
   --overwrite
 ```
 
-> **Note:** Do not specify `--source eap8`. The Quarkus ruleset targets any Java EE application regardless of source platform.
+> [!TIP]
+> Do not specify `--source eap8`. The Quarkus ruleset targets any Java EE application regardless of source platform.
 
-The analysis identified **13 incidents** - mostly structural changes to `pom.xml`. However, MTA does not detect messaging, batch processing, UI, transaction management, or lazy loading issues, which represent the bulk of the effort.
+The analysis identified **13 incidents** - mostly structural changes to `pom.xml`.
+
+> [!WARNING]
+> MTA does not detect messaging, batch processing, UI, transaction management, or lazy loading issues, which represent the bulk of the migration effort. See the [Gotchas](#gotchas---things-mta-does-not-detect) section for the full list.
 
 ---
 
@@ -71,7 +75,8 @@ Transform `pom.xml` from a Jakarta EE WAR project (managed by EAP BOM) to a Quar
 
 ### Key difference
 
-In EAP, all Jakarta EE APIs are `provided` by the application server. In Quarkus, there is no application server - each capability is an explicit extension dependency.
+> [!IMPORTANT]
+> In EAP, all Jakarta EE APIs are `provided` by the application server. In Quarkus, there is no application server. Each capability is an explicit extension dependency in your `pom.xml`.
 
 ### Third-party dependency upgrade
 
@@ -105,7 +110,8 @@ quarkus.datasource.db-kind=postgresql
 quarkus.hibernate-orm.database.generation=drop-and-create
 ```
 
-> **Dev Services:** In dev mode, Quarkus automatically starts a PostgreSQL container via Docker/Testcontainers. No manual database setup required.
+> [!TIP]
+> **Dev Services:** In dev mode, Quarkus automatically starts a PostgreSQL container via Docker/Testcontainers. No manual database setup required. Just run `mvn quarkus:dev` with Docker running.
 
 ### 4 repositories changed
 
@@ -130,7 +136,8 @@ Quarkus does not support EJBs. All `@Stateless`, `@Singleton`, and `@Schedule` a
 
 ### Critical: `@Transactional` is mandatory
 
-In EAP, `@Stateless` provides implicit container-managed transactions - every method runs in a transaction by default. In Quarkus with `@ApplicationScoped`, **there is no implicit transaction**. Without `@Transactional`, any JPA operation outside a transaction will fail silently or throw `LazyInitializationException`.
+> [!CAUTION]
+> In EAP, `@Stateless` provides implicit container-managed transactions. Every method runs in a transaction by default. In Quarkus with `@ApplicationScoped`, **there is no implicit transaction**. Without `@Transactional`, JPA operations fail silently or throw `LazyInitializationException`. The application compiles and starts normally, but breaks at runtime when a user interacts with the UI.
 
 `@Transactional` was added to **11 beans**:
 
@@ -158,6 +165,7 @@ In EAP, `@Stateless` provides implicit container-managed transactions - every me
 
 `CargoMonitoringService`, `HandlingReportService`, `GraphTraversalService` - dropped `@Stateless`, added `@ApplicationScoped`. The `RestConfiguration` class (JAX-RS `Application`) was replaced by `quarkus.rest.path=/rest` in `application.properties`.
 
+> [!WARNING]
 > **CDI strictness:** Quarkus validates CDI at build time. Circular dependencies and ambiguous injection points that work silently in EAP will cause compile-time errors in Quarkus.
 
 ---
@@ -174,7 +182,8 @@ The original application uses JMS (5 queues, 1 producer, 5 MDB consumers) manage
 | Artemis JMS via `quarkus-artemis-jms` | Closest to original architecture | Requires running Artemis broker |
 | Reactive Messaging (SmallRye) | Cloud-native, backpressure | Biggest rewrite, different paradigm |
 
-**Decision:** CDI Events - the demo runs locally without external infrastructure. For production, Artemis JMS or Reactive Messaging would be appropriate.
+> [!NOTE]
+> **Decision:** CDI Events. In EAP 8.1, the ActiveMQ Artemis broker runs embedded in the same JVM process as the application. If the EAP process dies, the broker dies with it and in-memory messages are lost. In a container/OpenShift environment, the pod is ephemeral and restarts from scratch. CDI Events provide the same in-process, in-memory semantics without requiring an external broker. An external messaging system (Artemis, Kafka, AMQP) would only be justified if the application needed message persistence across restarts or inter-service communication between separate pods.
 
 ### What changed
 
@@ -305,7 +314,8 @@ The [Quarkiverse PrimeFaces extension](https://docs.quarkiverse.io/quarkus-prime
 
 ### Moving web resources
 
-**Critical:** Quarkus does not serve files from `src/main/webapp/`. All web resources must be in `src/main/resources/META-INF/resources/`.
+> [!CAUTION]
+> Quarkus does not serve files from `src/main/webapp/`. All web resources (XHTML views, CSS, images, `web.xml`, `faces-config.xml`) must be in `src/main/resources/META-INF/resources/`.
 
 ```
 # Before (EAP 8.1)
@@ -382,7 +392,8 @@ MyFaces enforces that `<f:metadata>` must be a direct child of `UIViewRoot`. In 
 
 ### `web.xml` dual location - dev mode vs packaged JAR
 
-In `quarkus:dev` mode, the Quarkus reads `web.xml` from the filesystem at `target/classes/META-INF/resources/WEB-INF/web.xml`. In a packaged JAR (container/OCP), the Quarkus Undertow extension reads servlet context-params from **`META-INF/web.xml`** on the classpath - confirmed in the [MyFacesProcessor.java source code](https://github.com/apache/myfaces/blob/main/extensions/quarkus/deployment/src/main/java/org/apache/myfaces/core/extensions/quarkus/deployment/MyFacesProcessor.java).
+> [!WARNING]
+> In `quarkus:dev` mode, Quarkus reads `web.xml` from the filesystem at `target/classes/META-INF/resources/WEB-INF/web.xml`. In a packaged JAR (container/OCP), the Undertow extension reads servlet context-params from **`META-INF/web.xml`** on the classpath. Confirmed in the [MyFacesProcessor.java source code](https://github.com/apache/myfaces/blob/main/extensions/quarkus/deployment/src/main/java/org/apache/myfaces/core/extensions/quarkus/deployment/MyFacesProcessor.java). If `web.xml` only exists in one location, features like `CLIENT_WINDOW_MODE` will work locally but break in production.
 
 The `web.xml` must exist in **two** locations:
 - `src/main/resources/META-INF/web.xml` - for Undertow/MyFaces to read context-params (servlet configuration)
@@ -392,7 +403,8 @@ Both files must be kept in sync.
 
 ### JSF Faces Flows - not supported in packaged mode
 
-JSF Faces Flows (`@FlowScoped` + `booking-flow.xml`) work in `quarkus:dev` mode but **fail in packaged JAR/container** mode. The MyFaces Quarkus extension does not scan `META-INF/resources/` for flow definition XML files (`*-flow.xml`) at build time - it only discovers `.xhtml` views. In dev mode, the runtime scans the filesystem directly, which works.
+> [!CAUTION]
+> JSF Faces Flows (`@FlowScoped` + `booking-flow.xml`) work in `quarkus:dev` mode but **fail in packaged JAR/container** mode. The MyFaces Quarkus extension does not scan `META-INF/resources/` for flow definition XML files (`*-flow.xml`) at build time; it only discovers `.xhtml` views. In dev mode, the runtime scans the filesystem directly, which works. This difference between dev mode and packaged mode is silent: no error at startup, the flow navigation simply does nothing when clicked.
 
 **Fix:** Replace `@FlowScoped` with `@SessionScoped` and convert flow navigation to direct URL navigation:
 
@@ -410,7 +422,8 @@ JSF Faces Flows (`@FlowScoped` + `booking-flow.xml`) work in `quarkus:dev` mode 
 
 ### Why?
 
-EAP's `persistence.xml` had `hibernate.enable_lazy_load_no_trans=true`, which allowed lazy-loaded collections to be accessed outside a Hibernate session. **Quarkus does not support this property.** When JSF views access lazy collections during the render phase (outside the transaction), a `LazyInitializationException` occurs.
+> [!WARNING]
+> EAP's `persistence.xml` had `hibernate.enable_lazy_load_no_trans=true`, which allowed lazy-loaded collections to be accessed outside a Hibernate session. **Quarkus does not support this property.** When JSF views access lazy collections during the render phase (outside the transaction), a `LazyInitializationException` occurs. This error only appears at runtime when a user navigates to a page that renders the lazy collection.
 
 ### What changed
 
@@ -483,7 +496,8 @@ Pure domain model tests - no container needed:
 cargo-tracker.graph-traversal-url=http://localhost:${quarkus.http.test-port}/rest/graph-traversal/shortest-path
 ```
 
-In test mode, Quarkus runs on a random port. The graph traversal URL must use `${quarkus.http.test-port}` instead of hardcoded `8080`.
+> [!TIP]
+> In test mode, Quarkus runs on a random port. The graph traversal URL must use `${quarkus.http.test-port}` instead of hardcoded `8080`. Without this, the `ExternalRoutingService` will fail with `Connection refused` during integration tests.
 
 ### Result
 
@@ -523,15 +537,41 @@ Tests run: 25, Failures: 0, Errors: 0, Skipped: 0 - BUILD SUCCESS
 
 These are the issues that caused runtime errors and required manual investigation:
 
-1. **Missing `@Transactional`** - EJB transactions are implicit; Quarkus requires explicit `@Transactional`. Without it, JPA operations fail silently or throw exceptions during JSF render.
-2. **`hibernate.enable_lazy_load_no_trans`** - Not supported in Quarkus. Lazy collections accessed outside transactions cause `LazyInitializationException`. Fix: change to `FetchType.EAGER` or ensure access within transaction scope.
-3. **`@Named` with dots** - Mojarra treats `admin.track` as a literal bean name. MyFaces interprets it as property navigation (`admin` → `track`). Fix: rename to camelCase.
-4. **`<f:metadata>` placement** - Mojarra allows `<f:metadata>` anywhere. MyFaces requires it as a direct child of `UIViewRoot`. Fix: use `<ui:define name="metadata">` in templates.
-5. **`src/main/webapp/` ignored** - Quarkus serves web content from `META-INF/resources/`, not `webapp/`. All views and static files must be moved.
-6. **`<welcome-file>` for `.xhtml`** - Undertow in Quarkus does not process JSF welcome files. Fix: static `index.html` with meta redirect.
-7. **`<mime-mapping>` conflicts** - PrimeFaces `web-fragment.xml` declares font mime-mappings. Duplicates in `web.xml` cause NPE in Undertow.
-8. **`web.xml` dual location** - In dev mode, Quarkus reads `web.xml` from the filesystem. In packaged JAR, Undertow reads context-params from `META-INF/web.xml`, not from `META-INF/resources/WEB-INF/web.xml`. The file must exist in both locations.
-9. **JSF Faces Flows broken in container** - The MyFaces Quarkus extension does not scan `META-INF/resources/` for flow definition XML files. `@FlowScoped` + `booking-flow.xml` works in dev mode (filesystem scanning) but fails in JAR/container. Fix: replace with `@SessionScoped` and direct URL navigation.
+> [!CAUTION]
+> **1. Missing `@Transactional`**
+> EJB transactions are implicit; Quarkus requires explicit `@Transactional`. Without it, JPA operations fail silently or throw exceptions during JSF render.
+
+> [!WARNING]
+> **2. `hibernate.enable_lazy_load_no_trans`**
+> Not supported in Quarkus. Lazy collections accessed outside transactions cause `LazyInitializationException`. Fix: change to `FetchType.EAGER` or ensure access within transaction scope.
+
+> [!WARNING]
+> **3. `@Named` with dots**
+> Mojarra treats `admin.track` as a literal bean name. MyFaces interprets it as property navigation (`admin` then `track`). Fix: rename to camelCase.
+
+> [!WARNING]
+> **4. `<f:metadata>` placement**
+> Mojarra allows `<f:metadata>` anywhere. MyFaces requires it as a direct child of `UIViewRoot`. Fix: use `<ui:define name="metadata">` in templates, or place before `<h:head>` in standalone views.
+
+> [!CAUTION]
+> **5. `src/main/webapp/` ignored**
+> Quarkus serves web content from `META-INF/resources/`, not `webapp/`. All views and static files must be moved.
+
+> [!WARNING]
+> **6. `<welcome-file>` for `.xhtml`**
+> Undertow in Quarkus does not process JSF welcome files. Fix: static `index.html` with meta redirect.
+
+> [!WARNING]
+> **7. `<mime-mapping>` conflicts**
+> PrimeFaces `web-fragment.xml` declares font mime-mappings. Duplicates in `web.xml` cause NPE in Undertow ([quarkusio/quarkus#57602](https://github.com/quarkusio/quarkus/issues/57602)).
+
+> [!CAUTION]
+> **8. `web.xml` dual location**
+> In dev mode, Quarkus reads `web.xml` from the filesystem. In packaged JAR, Undertow reads context-params from `META-INF/web.xml`, not from `META-INF/resources/WEB-INF/web.xml`. The file must exist in both locations. Features like `CLIENT_WINDOW_MODE` will work locally but break in production if this is missed.
+
+> [!CAUTION]
+> **9. JSF Faces Flows broken in container**
+> The MyFaces Quarkus extension does not scan `META-INF/resources/` for flow definition XML files. `@FlowScoped` + `booking-flow.xml` works in dev mode (filesystem scanning) but fails silently in JAR/container. Fix: replace with `@SessionScoped` and direct URL navigation.
 
 ---
 
@@ -587,25 +627,24 @@ Measured on the same OpenShift cluster, same application, same PostgreSQL databa
 | Startup time | 55.6s | 5.9s | **9.4x faster** |
 | Memory usage | 583 Mi | 259 Mi | **2.3x less memory** |
 
-**How these were measured:**
-- **Startup:** From pod logs - EAP: `WFLYSRV0025: JBoss EAP 8.1 ... started in 55612ms`; Quarkus: `cargo-tracker ... started in 5.886s`
-- **Memory:** From container cgroup - `cat /sys/fs/cgroup/memory.current` on each pod
-
-Both deployments:
-- Project: OpenShift 4.x on `api.ocp4.masales.cloud:6443`
-- Database: PostgreSQL 15 (`registry.redhat.io/rhel9/postgresql-15`)
-- Java: OpenJDK 17
+> [!NOTE]
+> **How these were measured:**
+> - **Startup:** From pod logs. EAP: `WFLYSRV0025: JBoss EAP 8.1 ... started in 55612ms`; Quarkus: `cargo-tracker ... started in 5.886s`
+> - **Memory:** From container cgroup: `cat /sys/fs/cgroup/memory.current` on each pod
+> - **Environment:** Same OpenShift 4.x cluster (`api.ocp4.masales.cloud:6443`), PostgreSQL 15 (`registry.redhat.io/rhel9/postgresql-15`), OpenJDK 17
 
 ---
 
 ## Running locally
 
+> [!TIP]
+> Docker (or Podman) must be running before starting. Quarkus Dev Services automatically provisions a PostgreSQL container.
+
 ```shell
-# Requires Docker running (for Dev Services PostgreSQL)
 mvn quarkus:dev
 ```
 
-The application starts at `http://localhost:8080` with a PostgreSQL container automatically provisioned.
+The application starts at `http://localhost:8080`.
 
 ## Running tests
 

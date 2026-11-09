@@ -14,7 +14,8 @@ See [QUARKUS.md](QUARKUS.md) for the complete step-by-step migration guide cover
 - Maven 3.9+
 - Docker or Podman running (for Dev Services PostgreSQL)
 
-No application server, no external database, no Red Hat Maven repository required.
+> [!TIP]
+> No application server, no external database, no Red Hat Maven repository required. Docker/Podman must be running for Dev Services to provision PostgreSQL automatically.
 
 ## Build
 
@@ -37,7 +38,8 @@ mvn test
 # 25 tests (5 unit test classes + 1 integration test with @QuarkusTest)
 ```
 
-Tests also use Dev Services - no manual database setup needed.
+> [!NOTE]
+> Tests also use Dev Services. No manual database setup needed.
 
 ## Migration path
 
@@ -129,9 +131,11 @@ file is available under [src/test/resources/handling_events.csv](src/test/resour
 Successfully processed entries are archived under /tmp/archive. Any failed records are
 archived under /tmp/failed.
 
-*All data entered is wiped upon application restart (schema is recreated via `drop-and-create`).*
+> [!IMPORTANT]
+> All data entered is wiped upon application restart (schema is recreated via `drop-and-create`). Sample data is re-seeded on each startup via `SampleDataGenerator`.
 
 ## Known Issues
 
-* **`@FlowScoped` (Booking flow):** JSF Faces Flows work when navigated via the "Book" menu button. Direct URL access to `/booking/booking.xhtml` will fail because the Flow context is not active outside navigation.
-* **Data is wiped on restart:** The application uses `drop-and-create` schema generation. Sample data is re-seeded on each startup via `SampleDataGenerator`.
+> [!NOTE]
+> * **Data is wiped on restart:** The application uses `drop-and-create` schema generation.
+> * **Booking flow uses `@SessionScoped`:** The original EAP version used `@FlowScoped` with a JSF Faces Flow. Quarkus/MyFaces does not support flow definition XML files in packaged JARs, so the booking wizard uses `@SessionScoped` with direct URL navigation instead.
