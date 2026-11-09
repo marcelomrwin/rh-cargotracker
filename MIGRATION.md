@@ -44,8 +44,10 @@ The MTA CLI provides the `openrewrite` command to transform source code automati
 **Chapter 8  - "Performing a transformation with the MTA command-line interface"**
 of *"Using the migration toolkit for applications command-line interface"*.
 
-> **Note  - MTA 8.3.3:** `mta-cli openrewrite` is marked **deprecated** in this version. Recipe names differ from the printed documentation  - use the names listed below (`jakarta-imports`, `jakarta-xml`, `eap8-xml`).
+> [!NOTE]
+> **MTA 8.3.3:** `mta-cli openrewrite` is marked **deprecated** in this version. Recipe names differ from the printed documentation. Use the names listed below (`jakarta-imports`, `jakarta-xml`, `eap8-xml`).
 
+> [!WARNING]
 > **Container runtime requirement:** The `openrewrite` command always uses a container internally (Podman must be installed and configured). The MTA 8.3.3 container image (`mta-cli-rhel9:8.3.3`) has a known issue: the directory `/tmp/source-app` inside the image is pre-created with root ownership and mode 755. When the command runs as a non-root user, the container cannot write there and silently fails (exits 0 but makes no changes). The workaround is to run `mta-cli openrewrite` as root using `sudo`, with environment variables explicitly forwarded:
 
 ```shell
@@ -190,7 +192,10 @@ The UI theme was also changed from `omega` (retired in Primefaces 12) to `saga`.
 
 ### CDI descriptor (beans.xml)
 
-Updated to Jakarta EE 3.0 namespace. The `bean-discovery-mode="all"` attribute is now **required**  - CDI 4.0 changed the default from `all` to `annotated`, which is a silent breaking change:
+Updated to Jakarta EE 3.0 namespace.
+
+> [!CAUTION]
+> The `bean-discovery-mode="all"` attribute is now **required**. CDI 4.0 changed the default from `all` to `annotated`, which is a silent breaking change. Without it, beans that are not annotated with a scope annotation will not be discovered.
 
 ```xml
 <beans xmlns="https://jakarta.ee/xml/ns/jakartaee"

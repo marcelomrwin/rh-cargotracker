@@ -36,7 +36,8 @@ See [MIGRATION.md](MIGRATION.md) for the complete step-by-step migration log, in
 mvn clean package -DskipTests
 ```
 
-> **Note:** The `pom.xml` uses the Red Hat EAP 8 BOM (`org.jboss.bom:jboss-eap-ee-with-tools`), which is not available in Maven Central. Add the Red Hat GA repository to your `~/.m2/settings.xml` or to the project `pom.xml` before building.
+> [!IMPORTANT]
+> The `pom.xml` uses the Red Hat EAP 8 BOM (`org.jboss.bom:jboss-eap-ee-with-tools`), which is not available in Maven Central. Add the Red Hat GA repository to your `~/.m2/settings.xml` or to the project `pom.xml` before building.
 
 The WAR file will be generated at `target/cargo-tracker.war`.
 
@@ -157,6 +158,9 @@ by simply digging into the code to see how things are implemented.
 
 ## Known Issues
 
-* **Red Hat Maven repository required:** The EAP 8 BOM (`org.jboss.bom:jboss-eap-ee-with-tools`) is not published to Maven Central. The build will fail without access to `https://maven.repository.redhat.com/ga/`.
-* **`javax.sql.DataSource` in web.xml:** The MTA analysis flags `javax.sql.DataSource` as a migration issue, but this is a false positive  - `javax.sql` is part of the Java SE standard and was not moved to the `jakarta` namespace. It must not be changed.
-* **Data is wiped on restart:** The application uses a PostgreSQL database. All data is preserved between restarts, but the schema is recreated if the database is empty.
+> [!WARNING]
+> * **Red Hat Maven repository required:** The EAP 8 BOM (`org.jboss.bom:jboss-eap-ee-with-tools`) is not published to Maven Central. The build will fail without access to `https://maven.repository.redhat.com/ga/`.
+
+> [!NOTE]
+> * **`javax.sql.DataSource` in web.xml:** The MTA analysis flags `javax.sql.DataSource` as a migration issue, but this is a false positive. `javax.sql` is part of the Java SE standard and was not moved to the `jakarta` namespace. It must not be changed.
+> * **Data is wiped on restart:** The application uses a PostgreSQL database. All data is preserved between restarts, but the schema is recreated if the database is empty.
