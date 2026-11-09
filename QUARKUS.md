@@ -235,33 +235,43 @@ All 5 `<jms-destination>` entries and the `<resource-ref>` for the datasource we
 
 ---
 
-## Step 5 - Jakarta Batch to plain Java
+## Step 5 - Jakarta Batch via quarkus-jberet
 
-### Why?
+### Why keep Jakarta Batch?
 
-Quarkus supports Jakarta Batch (JSR 352) via the community [quarkus-jberet](https://quarkus.io/extensions/io.quarkiverse.jberet/quarkus-jberet/) extension (Quarkiverse, stable, version 2.11.0+). However, Jakarta Batch is designed for large-scale data processing with checkpointing, restart, and skip policies. The Cargo Tracker file processing is trivial: read CSV lines, parse, fire an event, archive. Using a full batch framework for this is unnecessary complexity. The logic was consolidated into plain Java instead.
+The Cargo Tracker application exists to demonstrate Jakarta EE specifications in action. Jakarta Batch (JSR 352) is one of those specs, used here for CSV file processing with readers, writers, listeners, and checkpointing. Replacing it with plain Java would remove a feature the project exists to showcase.
+
+Quarkus supports Jakarta Batch via the [quarkus-jberet](https://quarkus.io/extensions/io.quarkiverse.jberet/quarkus-jberet/) extension (Quarkiverse, stable, version 2.11.0), which implements the full JSR 352 specification using the JBeret runtime.
 
 ### What changed
 
-The entire Jakarta Batch subsystem was **consolidated into `UploadDirectoryScanner`** - a single `@ApplicationScoped` bean that does everything the batch job did:
+The batch classes, job XML descriptor, and checkpoint class were **preserved as-is** from EAP 8.1. The only change was in `UploadDirectoryScanner`:
 
-| Before (EAP 8.1) - 6 files | After (Quarkus) - 1 file |
-|-----------------------------|--------------------------|
-| `EventFilesProcessorJob.xml` - batch job descriptor | Deleted |
-| `EventItemReader` - reads CSV lines, parses events | Logic moved to `UploadDirectoryScanner.parseLine()` |
-| `EventItemWriter` - writes to `ApplicationEvents` + archive | Logic moved to `UploadDirectoryScanner.processFile()` |
-| `FileProcessorJobListener` - logs job start/end | Logging in `processFiles()` |
-| `LineParseExceptionListener` - writes failed lines | Logic moved to `writeFailedLine()` |
-| `EventFilesCheckpoint` - batch checkpoint state | Deleted (not needed without batch resumability) |
+| Before (EAP 8.1) | After (Quarkus) |
+|-------------------|-----------------|
+| `@Stateless` | `@ApplicationScoped` |
+| `@Schedule(minute = "*/2", hour = "*")` | `@Scheduled(every = "2m")` |
+| `BatchRuntime.getJobOperator()` | `@Inject JobOperator` |
 
-The `@Scheduled(every = "2m")` annotation (from Step 3) triggers the processing. The flow is:
+All batch artifacts are unchanged:
+- `EventFilesProcessorJob.xml` in `META-INF/batch-jobs/`
+- `EventItemReader`, `EventItemWriter`, `FileProcessorJobListener`, `LineParseExceptionListener`, `EventFilesCheckpoint`
 
-1. Scan `/tmp/uploads` for CSV files
-2. Read each line, parse into `HandlingEventRegistrationAttempt`
-3. Fire CDI event via `applicationEvents.receivedHandlingEventRegistrationAttempt()`
-4. Archive processed lines to `/tmp/archive`
-5. Write unparseable lines to `/tmp/failed`
-6. Delete processed files
+### Dependency added to `pom.xml`
+
+```xml
+<dependency>
+    <groupId>io.quarkiverse.jberet</groupId>
+    <artifactId>quarkus-jberet</artifactId>
+    <version>2.11.0</version>
+</dependency>
+```
+
+> [!WARNING]
+> With Quarkus 3.40.1, the JBeret internal class `SchedulingJobListener` causes a CDI build error (`UnsatisfiedResolutionException` for `@BatchProperty List<BatchStatus>`). This is a JBeret scheduling feature not used here (we use `quarkus-scheduler` instead). The workaround is to exclude it:
+> ```properties
+> quarkus.arc.exclude-types=org.jberet.schedule.SchedulingJobListener
+> ```
 
 ---
 
@@ -520,7 +530,7 @@ Tests run: 25, Failures: 0, Errors: 0, Skipped: 0 - BUILD SUCCESS
 | Startup | `@Startup @PostConstruct` | `@Observes StartupEvent` | 1 class |
 | REST endpoints | `@Stateless` + `Application` class | `@ApplicationScoped` + `quarkus.rest.path` | 4 classes |
 | Messaging | JMS (`JMSContext` + 5 MDBs) | CDI Events (`Event<T>` + `@ObservesAsync`) | 6 classes rewritten, 3 records created |
-| Batch processing | Jakarta Batch (6 classes + XML) | Consolidated into `UploadDirectoryScanner` | 5 deleted, 1 rewritten |
+| Batch processing | Jakarta Batch via EAP embedded JBeret | Jakarta Batch via `quarkus-jberet` 2.11.0 | `UploadDirectoryScanner` rewritten, batch classes preserved |
 | Configuration | JNDI `@Resource` lookup | `@ConfigProperty` | 1 class |
 | Lazy loading | `enable_lazy_load_no_trans=true` | `FetchType.EAGER` on embedded collections | 2 entities |
 | UI framework | JSF/PrimeFaces served by EAP | `quarkus-primefaces` 3.12.5 + Undertow | `pom.xml`, views moved |
