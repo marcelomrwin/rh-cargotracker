@@ -239,7 +239,7 @@ All 5 `<jms-destination>` entries and the `<resource-ref>` for the datasource we
 
 ### Why?
 
-Quarkus does not support Jakarta Batch (JSR 352). The file processing subsystem used a batch job (`EventFilesProcessorJob.xml`) with a reader, writer, and listeners managed by the Jakarta Batch runtime.
+Quarkus supports Jakarta Batch (JSR 352) via the community [quarkus-jberet](https://quarkus.io/extensions/io.quarkiverse.jberet/quarkus-jberet/) extension (Quarkiverse, stable, version 2.11.0+). However, Jakarta Batch is designed for large-scale data processing with checkpointing, restart, and skip policies. The Cargo Tracker file processing is trivial: read CSV lines, parse, fire an event, archive. Using a full batch framework for this is unnecessary complexity. The logic was consolidated into plain Java instead.
 
 ### What changed
 
