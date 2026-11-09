@@ -14,7 +14,10 @@ This branch includes an MTA (Migration Toolkit for Applications) analysis report
 
 ### Prerequisites
 
-- Java 11 (`JAVA_HOME` must point to a Java 11 JDK  - EAP 7.4 does not support Java 17+)
+> [!WARNING]
+> EAP 7.4 does not support Java 17+. Use Java 11.
+
+- Java 11 (`JAVA_HOME` must point to a Java 11 JDK)
 - Maven 3.6+
 - JBoss EAP 7.4
 
@@ -46,6 +49,7 @@ $EAP_HOME/bin/jboss-cli.sh --connect --command=\
   enabled=true)'
 ```
 
+> [!IMPORTANT]
 > The application does not define its own datasource. It expects `java:/jdbc/CargoTrackerDatabase` to be configured at the server level.
 
 ### Deploy
