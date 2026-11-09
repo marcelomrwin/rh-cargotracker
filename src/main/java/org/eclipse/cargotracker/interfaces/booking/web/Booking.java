@@ -7,7 +7,7 @@ import java.util.List;
 
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
-import jakarta.faces.flow.FlowScoped;
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
@@ -20,7 +20,7 @@ import org.joda.time.LocalDate;
 import org.primefaces.PrimeFaces;
 
 @Named
-@FlowScoped("booking")
+@SessionScoped
 public class Booking implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -154,10 +154,6 @@ public class Booking implements Serializable {
 			return null;
 		}
 
-		return "/admin/dashboard.xhtml";
-	}
-
-	public String getReturnValue() {
-		return "/admin/dashboard.xhtml";
+		return "/admin/dashboard.xhtml?faces-redirect=true";
 	}
 }

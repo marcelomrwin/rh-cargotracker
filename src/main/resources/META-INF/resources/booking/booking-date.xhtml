@@ -36,8 +36,8 @@
 				<hr />
 				<h:panelGrid columns="5" styleClass="registrationPanelGrid"
 					style="margin: 0 auto;">
-					<p:commandButton value="Back" action="booking-destination" />
-					<p:commandButton value="Cancel" action="/admin/dashboard" />
+					<p:commandButton value="Back" action="/booking/booking-destination.xhtml?faces-redirect=true" />
+					<p:commandButton value="Cancel" action="/admin/dashboard.xhtml?faces-redirect=true" />
 					<p:commandButton value="Book Cargo" id="bookBtn"
 						action="#{booking.register()}"
 						disabled="#{!booking.bookable}" />

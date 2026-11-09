@@ -366,7 +366,33 @@ MyFaces enforces that `<f:metadata>` must be a direct child of `UIViewRoot`. In 
 </ui:define>
 ```
 
-**Files fixed:** `show.xhtml`, `route.xhtml`, `selectItinerary.xhtml`.
+**Files fixed:**
+- Template views (use `<ui:define name="metadata">`): `show.xhtml`, `route.xhtml`, `selectItinerary.xhtml`
+- Standalone dialog views (moved `<f:metadata>` before `<h:head>`): `changeDestination.xhtml`, `changeArrivalDeadlineDate.xhtml`
+
+### `web.xml` dual location — dev mode vs packaged JAR
+
+In `quarkus:dev` mode, the Quarkus reads `web.xml` from the filesystem at `target/classes/META-INF/resources/WEB-INF/web.xml`. In a packaged JAR (container/OCP), the Quarkus Undertow extension reads servlet context-params from **`META-INF/web.xml`** on the classpath — confirmed in the [MyFacesProcessor.java source code](https://github.com/apache/myfaces/blob/main/extensions/quarkus/deployment/src/main/java/org/apache/myfaces/core/extensions/quarkus/deployment/MyFacesProcessor.java).
+
+The `web.xml` must exist in **two** locations:
+- `src/main/resources/META-INF/web.xml` — for Undertow/MyFaces to read context-params (servlet configuration)
+- `src/main/resources/META-INF/resources/WEB-INF/web.xml` — for JSF to serve as a web resource (Faces Servlet mapping, etc.)
+
+Both files must be kept in sync.
+
+### JSF Faces Flows — not supported in packaged mode
+
+JSF Faces Flows (`@FlowScoped` + `booking-flow.xml`) work in `quarkus:dev` mode but **fail in packaged JAR/container** mode. The MyFaces Quarkus extension does not scan `META-INF/resources/` for flow definition XML files (`*-flow.xml`) at build time — it only discovers `.xhtml` views. In dev mode, the runtime scans the filesystem directly, which works.
+
+**Fix:** Replace `@FlowScoped` with `@SessionScoped` and convert flow navigation to direct URL navigation:
+
+| Before (EAP 8.1) | After (Quarkus) |
+|-------------------|-----------------|
+| `@FlowScoped("booking")` | `@SessionScoped` |
+| `booking-flow.xml` (XML flow definition) | Deleted |
+| `<p:menuitem action="booking"/>` (flow entry) | `<p:menuitem url="#{request.contextPath}/booking/booking.xhtml"/>` (direct link) |
+| `action="booking-destination"` (flow navigation) | `action="/booking/booking-destination.xhtml?faces-redirect=true"` |
+| `action="/admin/dashboard"` (flow return) | `action="/admin/dashboard.xhtml?faces-redirect=true"` |
 
 ---
 
@@ -476,7 +502,9 @@ Tests run: 25, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS
 | UI framework | JSF/PrimeFaces served by EAP | `quarkus-primefaces` 3.12.5 + Undertow | `pom.xml`, views moved |
 | Web resources | `src/main/webapp/` | `src/main/resources/META-INF/resources/` | All views/CSS/images moved |
 | `@Named` beans | Dots in names (`admin.track`) | camelCase (`adminTrack`) | 2 beans + 2 XHTMLs |
-| `<f:metadata>` | Inside `<ui:define name="content">` | Inside `<ui:define name="metadata">` | 3 views + 1 template |
+| `<f:metadata>` | Inside `<ui:define name="content">` or `<h:body>` | Before `<h:head>` or in `<ui:define name="metadata">` | 5 views + 1 template |
+| JSF Faces Flows | `@FlowScoped` + `booking-flow.xml` | `@SessionScoped` + direct URL navigation | 1 bean + 3 XHTMLs + 1 template |
+| `web.xml` location | `src/main/webapp/WEB-INF/web.xml` | Dual: `META-INF/web.xml` + `META-INF/resources/WEB-INF/web.xml` | 2 files |
 | Welcome file | `web.xml` `<welcome-file>` | `index.html` with meta redirect | 1 file created |
 | Tests | JUnit 4 + Arquillian + ShrinkWrap | JUnit 5 + `@QuarkusTest` + `@TestTransaction` | 6 tests migrated, 4 deleted |
 | Badge | "JBoss EAP 8.1" (red) | "Quarkus 3.40" (blue) | 2 templates |
@@ -492,6 +520,8 @@ These are the issues that caused runtime errors and required manual investigatio
 5. **`src/main/webapp/` ignored** — Quarkus serves web content from `META-INF/resources/`, not `webapp/`. All views and static files must be moved.
 6. **`<welcome-file>` for `.xhtml`** — Undertow in Quarkus does not process JSF welcome files. Fix: static `index.html` with meta redirect.
 7. **`<mime-mapping>` conflicts** — PrimeFaces `web-fragment.xml` declares font mime-mappings. Duplicates in `web.xml` cause NPE in Undertow.
+8. **`web.xml` dual location** — In dev mode, Quarkus reads `web.xml` from the filesystem. In packaged JAR, Undertow reads context-params from `META-INF/web.xml`, not from `META-INF/resources/WEB-INF/web.xml`. The file must exist in both locations.
+9. **JSF Faces Flows broken in container** — The MyFaces Quarkus extension does not scan `META-INF/resources/` for flow definition XML files. `@FlowScoped` + `booking-flow.xml` works in dev mode (filesystem scanning) but fails in JAR/container. Fix: replace with `@SessionScoped` and direct URL navigation.
 
 ---
 

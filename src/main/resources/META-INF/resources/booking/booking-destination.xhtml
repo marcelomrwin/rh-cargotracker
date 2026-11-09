@@ -32,9 +32,9 @@ work around to fix selectonemenu bug in Chrome & Safari
 				<hr />
 				<h:panelGrid columns="5" styleClass="registrationPanelGrid"
 					style="margin: 0 auto;">
-					<p:commandButton value="Back" action="booking" />
-					<p:commandButton value="Cancel" action="/admin/dashboard" />
-					<p:commandButton value="Next" action="booking-date" />
+					<p:commandButton value="Back" action="/booking/booking.xhtml?faces-redirect=true" />
+					<p:commandButton value="Cancel" action="/admin/dashboard.xhtml?faces-redirect=true" />
+					<p:commandButton value="Next" action="/booking/booking-date.xhtml?faces-redirect=true" />
 				</h:panelGrid>
 			</h:form>
 		</div>
