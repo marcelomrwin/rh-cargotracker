@@ -62,7 +62,7 @@ mvn test
 | Transactions | Implicit (EJB container) | Explicit `@Transactional` |
 | Persistence | `persistence.xml` + JNDI datasource | `application.properties` + Dev Services |
 | Messaging | JMS (5 queues, MDBs) | CDI Events (`Event<T>` + `@ObservesAsync`) |
-| Batch | Jakarta Batch (JSR 352) | Plain Java + `@Scheduled` |
+| Batch | Jakarta Batch via EAP embedded JBeret | Jakarta Batch via `quarkus-jberet` 2.11.0 + `@Scheduled` |
 | Configuration | JNDI `@Resource` lookup | `@ConfigProperty` |
 | UI | JSF/PrimeFaces served by EAP | `quarkus-primefaces` 3.12.5 (MyFaces + PrimeFaces 12) |
 | Web resources | `src/main/webapp/` | `src/main/resources/META-INF/resources/` |
