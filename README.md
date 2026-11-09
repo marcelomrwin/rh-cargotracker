@@ -79,6 +79,23 @@ Access the application at: http://localhost:8080/cargo-tracker
 | 4 | `quarkus` | Quarkus 3.40.1 (local) | 17 | Cloud-native modernization |
 | 5 | `quarkus` | Quarkus 3.40.1 (OpenShift) | 17 | Deploy, performance comparison |
 
+### Navigating between phases
+
+```shell
+# Clone the repository
+git clone https://github.com/marcelomrwin/rh-cargotracker.git
+cd rh-cargotracker
+
+# Phase 1 - EAP 7.4 (VM)
+git checkout jee7-eap7
+
+# Phase 2/3 - EAP 8.1 (VM + OpenShift)
+git checkout jakartaee10-eap8
+
+# Phase 4/5 - Quarkus (local + OpenShift)
+git checkout quarkus
+```
+
 ---
 
 ## Overview
