@@ -1,76 +1,82 @@
-# Eclipse Cargo Tracker - Migrating to Quarkus
+# Eclipse Cargo Tracker - Quarkus 3.40.1
 
 > **This branch (`quarkus`) is the Quarkus migration of the Cargo Tracker application.**
 > Starting point: [`jakartaee10-eap8`](https://github.com/marcelomrwin/rh-cargotracker/tree/jakartaee10-eap8) (EAP 8.1 / Jakarta EE 10 running on OpenShift).
 > Target: **Quarkus 3.40.1.1** — cloud-native, no application server required.
 
-## Migration log
+## Migration documentation
 
-See [QUARKUS.md](QUARKUS.md) for the complete migration plan, MTA analysis results, effort estimates per area, and step-by-step implementation log.
-
-## What changed from jee7-eap7
-
-- Java upgraded from 11 to 17
-- All `javax.*` imports replaced with `jakarta.*` equivalents (276 changes)
-- XML deployment descriptors updated to Jakarta EE namespaces
-- Maven dependencies updated: `javax` groupId replaced by `jakarta.platform`; Red Hat EAP 8 BOM introduced
-- Primefaces upgraded from `8.0` to `12.0.0` with classifier `jakarta`; theme changed from `omega` to `saga`
-- `beans.xml` updated to Jakarta EE 3.0 namespace with `bean-discovery-mode="all"` (required  - CDI 4.0 changed the default)
-- `faces-config.xml` updated to Jakarta Faces 4.0
-- `@PrivateOwned` (EclipseLink-specific) removed  - no equivalent in Hibernate
-- Hibernate implicit naming strategy for sequences/tables updated
-- Database changed from H2 in-memory to **PostgreSQL** for OpenShift deployment; H2 in-memory remains usable for local testing (see Prerequisites below)
+See [QUARKUS.md](QUARKUS.md) for the complete step-by-step migration guide covering all 9 steps, gotchas, and lessons learned.
 
 ## Prerequisites
 
-- Java 17 (`JAVA_HOME` must point to a Java 17 JDK)
-- Maven 3.6+
-- Access to the Red Hat Maven repository (required for the EAP 8 BOM): `https://maven.repository.redhat.com/ga/`
-- JBoss EAP 8.1
-- For local testing: H2 datasource configured in EAP 8.1 via `jboss-cli.sh` (same approach as `jee7-eap7`, using `standalone-full.xml`)
-- For OpenShift deployment: a PostgreSQL instance (see [ocp-deployment.md](ocp-deployment.md))
+- Java 17 or 21 (`JAVA_HOME` must point to a compatible JDK)
+- Maven 3.9+
+- Docker or Podman running (for Dev Services PostgreSQL)
+
+No application server, no external database, no Red Hat Maven repository required.
 
 ## Build
 
 ```shell
-mvn clean package -DskipTests
+mvn clean package
 ```
 
-> **Note:** The `pom.xml` uses the Red Hat EAP 8 BOM (`org.jboss.bom:jboss-eap-ee-with-tools`), which is not available in Maven Central. Add the Red Hat GA repository to your `~/.m2/settings.xml` or to the project `pom.xml` before building.
+## Run locally
 
-The WAR file will be generated at `target/cargo-tracker.war`.
+```shell
+mvn quarkus:dev
+```
 
-## OpenShift Cloud Readiness
+The application starts at `http://localhost:8080` with a PostgreSQL container automatically provisioned via Dev Services.
 
-Before deploying to OpenShift, MTA was used to assess cloud readiness. See [OCP-READINESS.md](OCP-READINESS.md) for the full analysis and [ocp-mta-report/index.html](ocp-mta-report/index.html) for the HTML report.
+## Run tests
 
-## Deploy on OpenShift
+```shell
+mvn test
+# 25 tests (5 unit test classes + 1 integration test with @QuarkusTest)
+```
 
-This branch includes Kubernetes/OpenShift manifests and an S2I Dockerfile for containerized deployment.
-
-See [ocp-deployment.md](ocp-deployment.md) for the complete step-by-step OpenShift deployment guide.
+Tests also use Dev Services — no manual database setup needed.
 
 ## Migration path
 
-| Branch | Runtime | Java |
-|--------|---------|------|
-| `javaee7` | Payara 4.1 | 8 |
-| `jee7-eap7` | JBoss EAP 7.4 | 11 |
-| `jakartaee10-eap8` | JBoss EAP 8.1 | 17 |
+| Branch | Runtime | Java | Status |
+|--------|---------|------|--------|
+| `javaee7` | Payara 4.1 | 8 | Original |
+| `jee7-eap7` | JBoss EAP 7.4 | 11 | Phase 1 |
+| `jakartaee10-eap8` | JBoss EAP 8.1 | 17 | Phase 2 |
+| **`quarkus`** | **Quarkus 3.40.1** | **17** | **Phase 3 (current)** |
+
+## What changed from EAP 8.1
+
+| Area | EAP 8.1 | Quarkus 3.40.1 |
+|------|---------|----------------|
+| Packaging | WAR deployed to app server | Quarkus JAR (no app server) |
+| Dependencies | EAP BOM (`provided`) | Quarkus extensions (`compile`) |
+| CDI | `@Stateless` / `@Singleton` (EJB) | `@ApplicationScoped` + `@Transactional` |
+| Transactions | Implicit (EJB container) | Explicit `@Transactional` |
+| Persistence | `persistence.xml` + JNDI datasource | `application.properties` + Dev Services |
+| Messaging | JMS (5 queues, MDBs) | CDI Events (`Event<T>` + `@ObservesAsync`) |
+| Batch | Jakarta Batch (JSR 352) | Plain Java + `@Scheduled` |
+| Configuration | JNDI `@Resource` lookup | `@ConfigProperty` |
+| UI | JSF/PrimeFaces served by EAP | `quarkus-primefaces` 3.12.5 (MyFaces + PrimeFaces 12) |
+| Web resources | `src/main/webapp/` | `src/main/resources/META-INF/resources/` |
+| Tests | JUnit 4 + Arquillian + ShrinkWrap | JUnit 5 + `@QuarkusTest` + `@TestTransaction` |
+| Startup | ~60 seconds | ~7 seconds |
 
 ---
 
 ## Overview
 
-The project demonstrates how you can develop applications with Jakarta EE using widely adopted architectural best practices like Domain-Driven 
-Design (DDD). The project is directly based on the well known 
-original [Java DDD sample application](http://dddsample.sourceforge.net) 
-developed by DDD pioneer Eric Evans' company Domain Language and the Swedish 
-software consulting company Citerus. The cargo example actually comes from 
-Eric Evans' seminal book on DDD. The original application is written in Spring,
-Hibernate and Jetty whereas the application is built on Jakarta EE.
+The project demonstrates how you can develop applications with Jakarta EE using widely adopted architectural best practices like Domain-Driven
+Design (DDD). The project is directly based on the well known
+original [Java DDD sample application](http://dddsample.sourceforge.net)
+developed by DDD pioneer Eric Evans' company Domain Language and the Swedish
+software consulting company Citerus. The cargo example actually comes from
+Eric Evans' seminal book on DDD.
 
-The application is an end-to-end system for keeping track of shipping cargo. It 
+The application is an end-to-end system for keeping track of shipping cargo. It
 has several interfaces described in the following sections.
 
 For further details on the project, please visit: https://eclipse-ee4j.github.io/cargotracker/.
@@ -79,81 +85,50 @@ For further details on the project, please visit: https://eclipse-ee4j.github.io
 
 ## Exploring the Application
 
-After the application runs, it will be available at: 
-http://localhost:8080/cargo-tracker/. Under the hood, the application uses a 
-number of Jakarta EE 10 features including Faces, CDI, EJB, JPA, JAX-RS, WebSocket, JSON Processing, Bean Validation and JMS.
+After the application runs, it will be available at:
+http://localhost:8080/. Under the hood, the application uses
+CDI, JPA (Hibernate ORM), JAX-RS (RESTEasy), WebSocket, Bean Validation, PrimeFaces (JSF/MyFaces), and Quarkus Scheduler.
 
 There are several web interfaces, REST interfaces and a file system scanning
 interface. It's probably best to start exploring the interfaces in the rough
 order below.
 
-The tracking interface let's you track the status of cargo and is
-intended for the general public. Try entering a tracking ID like ABC123 (the 
+The tracking interface lets you track the status of cargo and is
+intended for the general public. Try entering a tracking ID like ABC123 (the
 application is pre-populated with some sample data).
 
 The administrative interface is intended for the shipping company that manages
-cargo. The landing page of the interface is a dashboard providing an overall 
+cargo. The landing page of the interface is a dashboard providing an overall
 view of registered cargo. You can book cargo using the booking interface.
-One cargo is booked, you can route it. When you initiate a routing request,
+Once cargo is booked, you can route it. When you initiate a routing request,
 the system will determine routes that might work for the cargo. Once you select
 a route, the cargo will be ready to process handling events at the port. You can
 also change the destination for cargo if needed or track cargo.
 
-The Incident Logging interface is intended for port personnel registering what 
+The Incident Logging interface is intended for port personnel registering what
 happened to cargo. The interface is primarily intended for mobile devices, but
-you can use it via a desktop browser. The interface is accessible at this URL: http://localhost:8080/cargo-tracker/event-logger/index.xhtml. For convenience, you
-could use a mobile emulator instead of an actual mobile device. Generally speaking cargo
-goes through these events:
+you can use it via a desktop browser. The interface is accessible at: http://localhost:8080/event-logger/index.xhtml.
+
+Generally speaking cargo goes through these events:
 
 * It's received at the origin port.
-* It's loaded and unloaded onto voyages on it's itinerary.
-* It's claimed at it's destination port.
+* It's loaded and unloaded onto voyages on its itinerary.
+* It's claimed at its destination port.
 * It may go through customs at arbitrary points.
 
-While filling out the event registration form, it's best to have the itinerary 
-handy. You can access the itinerary for registered cargo via the admin interface. The cargo handling is done via Messaging for scalability. While using the incident logger, note that only the load 
-and unload events require as associated voyage.
+While filling out the event registration form, it's best to have the itinerary
+handy. You can access the itinerary for registered cargo via the admin interface.
 
-You should also explore the file system based bulk event registration interface. 
+You should also explore the file system based bulk event registration interface.
 It reads files under /tmp/uploads. The files are just CSV files. A sample CSV
-file is available under [src/test/resources/handling_events.csv](src/test/resources/handling_events.csv). The sample is already set up to match the remaining itinerary events for cargo ABC123. Just make sure to update the times in the first column of the sample CSV file to match the itinerary as well.
+file is available under [src/test/resources/handling_events.csv](src/test/resources/handling_events.csv). The sample is already set up to match the remaining itinerary events for cargo ABC123.
 
-Sucessfully processed entries are archived under /tmp/archive. Any failed records are 
+Successfully processed entries are archived under /tmp/archive. Any failed records are
 archived under /tmp/failed.
 
-Don't worry about making mistakes. The application is intended to be fairly 
-error tolerant. If you do come across issues, you should [report them](https://github.com/eclipse-ee4j/cargotracker/issues).
-
-*All data entered is wiped upon application restart, so you can start from 
-a blank slate easily if needed.*
-
-You can also use the soapUI scripts included in the source code to explore the 
-REST interfaces as well as the numerous unit tests covering the code base 
-generally.
-
-## Exploring the Code
-
-As mentioned earlier, the real point of the application is demonstrating how to 
-create well architected, effective Jakarta EE applications. To that end, once you 
-have gotten some familiarity with the application functionality the next thing 
-to do is to dig right into the code.
-
-DDD is a key aspect of the architecture, so it's important to get at least a 
-working understanding of DDD. As the name implies, Domain-Driven Design is an 
-approach to software design and development that focuses on the core domain and 
-domain logic.
-
-For the most part, it's fine if you are new to Jakarta EE. As long as you have a
-basic understanding of server-side applications, the code should be good enough to get started. For learning Jakarta EE further,
-we have recommended a few links in the resources section of the project site. Of 
-course, the ideal user of the project is someone who has a basic working 
-understanding both Jakarta EE and DDD. Though it's not our goal to become a kitchen 
-sink example for demonstrating the vast amount of APIs and features in Jakarta EE,
-we do use a very representative set. You'll find that you'll learn a fair amount
-by simply digging into the code to see how things are implemented.
+*All data entered is wiped upon application restart (schema is recreated via `drop-and-create`).*
 
 ## Known Issues
 
-* **Red Hat Maven repository required:** The EAP 8 BOM (`org.jboss.bom:jboss-eap-ee-with-tools`) is not published to Maven Central. The build will fail without access to `https://maven.repository.redhat.com/ga/`.
-* **`javax.sql.DataSource` in web.xml:** The MTA analysis flags `javax.sql.DataSource` as a migration issue, but this is a false positive  - `javax.sql` is part of the Java SE standard and was not moved to the `jakarta` namespace. It must not be changed.
-* **Data is wiped on restart:** The application uses a PostgreSQL database. All data is preserved between restarts, but the schema is recreated if the database is empty.
+* **`@FlowScoped` (Booking flow):** JSF Faces Flows work when navigated via the "Book" menu button. Direct URL access to `/booking/booking.xhtml` will fail because the Flow context is not active outside navigation.
+* **Data is wiped on restart:** The application uses `drop-and-create` schema generation. Sample data is re-seeded on each startup via `SampleDataGenerator`.
