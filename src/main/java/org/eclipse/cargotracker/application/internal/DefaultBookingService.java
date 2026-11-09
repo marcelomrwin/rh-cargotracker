@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import jakarta.inject.Inject;
 
 import org.eclipse.cargotracker.application.BookingService;
@@ -23,6 +24,7 @@ import org.eclipse.cargotracker.domain.service.RoutingService;
 
 // TODO [Jakarta EE 8] Adopt the Date-Time API.
 @ApplicationScoped
+@Transactional
 public class DefaultBookingService implements BookingService {
 
 	@Inject

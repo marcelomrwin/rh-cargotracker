@@ -25,7 +25,6 @@ public class DashboardView implements Serializable {
 	}
 
 	public DashboardView() {
-		// Initialize the dashboard model
 		this.model = new DefaultDashboardModel();
 		DashboardColumn mainColumn = new DefaultDashboardColumn();
 
@@ -34,7 +33,6 @@ public class DashboardView implements Serializable {
 		mainColumn.addWidget("Claimed");
 
 		this.model.addColumn(mainColumn);
-
 	}
 
 	public DashboardModel getModel() {

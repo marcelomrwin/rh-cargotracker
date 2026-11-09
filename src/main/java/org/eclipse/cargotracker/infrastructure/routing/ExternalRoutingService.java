@@ -15,7 +15,7 @@ import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.cargotracker.domain.model.cargo.Itinerary;
 import org.eclipse.cargotracker.domain.model.cargo.Leg;
 import org.eclipse.cargotracker.domain.model.cargo.RouteSpecification;
@@ -38,8 +38,8 @@ public class ExternalRoutingService implements RoutingService {
 	@Inject
 	private Logger logger;
 	
-	@Resource(lookup = "java:app/configuration/GraphTraversalUrl")
-	private String graphTraversalUrl;
+	@ConfigProperty(name = "cargo-tracker.graph-traversal-url")
+	String graphTraversalUrl;
 	
 	private final Client jaxrsClient = ClientBuilder.newClient();
 	private WebTarget graphTraversalResource;

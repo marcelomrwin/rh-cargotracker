@@ -6,6 +6,7 @@ import java.util.Date;
 
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -28,6 +29,7 @@ import org.eclipse.cargotracker.interfaces.handling.HandlingEventRegistrationAtt
  * system for proper registration.
  */
 @ApplicationScoped
+@Transactional
 @Path("/handling")
 public class HandlingReportService {
 

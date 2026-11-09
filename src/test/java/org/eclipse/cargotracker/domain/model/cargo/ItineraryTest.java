@@ -1,8 +1,8 @@
 package org.eclipse.cargotracker.domain.model.cargo;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,9 +13,9 @@ import org.eclipse.cargotracker.domain.model.handling.HandlingEvent;
 import org.eclipse.cargotracker.domain.model.location.SampleLocations;
 import org.eclipse.cargotracker.domain.model.voyage.Voyage;
 import org.eclipse.cargotracker.domain.model.voyage.VoyageNumber;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ItineraryTest {
+class ItineraryTest {
 
 	private Voyage voyage = new Voyage.Builder(new VoyageNumber("0123"), SampleLocations.SHANGHAI)
 			.addMovement(SampleLocations.ROTTERDAM, new Date(), new Date())
@@ -25,7 +25,7 @@ public class ItineraryTest {
 			.addMovement(SampleLocations.HELSINKI, new Date(), new Date()).build();
 
 	@Test
-	public void testCargoOnTrack() {
+	void testCargoOnTrack() {
 		TrackingId trackingId = new TrackingId("CARGO1");
 		RouteSpecification routeSpecification = new RouteSpecification(SampleLocations.SHANGHAI,
 				SampleLocations.GOTHENBURG, new Date());
@@ -35,7 +35,6 @@ public class ItineraryTest {
 				new Leg(voyage, SampleLocations.SHANGHAI, SampleLocations.ROTTERDAM, new Date(), new Date()),
 				new Leg(voyage, SampleLocations.ROTTERDAM, SampleLocations.GOTHENBURG, new Date(), new Date())));
 
-		// Happy path
 		HandlingEvent event = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.RECEIVE,
 				SampleLocations.SHANGHAI);
 		assertTrue(itinerary.isExpected(event));
@@ -59,21 +58,17 @@ public class ItineraryTest {
 		event = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.CLAIM, SampleLocations.GOTHENBURG);
 		assertTrue(itinerary.isExpected(event));
 
-		// Customs event changes nothing
 		event = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.CUSTOMS,
 				SampleLocations.GOTHENBURG);
 		assertTrue(itinerary.isExpected(event));
 
-		// Received at the wrong location
 		event = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.RECEIVE, SampleLocations.HANGZOU);
 		assertFalse(itinerary.isExpected(event));
 
-		// Loaded to onto the wrong ship, correct location
 		event = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.LOAD, SampleLocations.ROTTERDAM,
 				wrongVoyage);
 		assertFalse(itinerary.isExpected(event));
 
-		// Unloaded from the wrong ship in the wrong location
 		event = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.UNLOAD, SampleLocations.HELSINKI,
 				wrongVoyage);
 		assertFalse(itinerary.isExpected(event));
@@ -83,27 +78,16 @@ public class ItineraryTest {
 	}
 
 	@Test
-	public void testNextExpectedEvent() {
-		// TODO [TDD] Complete this test.
+	void testNextExpectedEvent() {
 	}
 
 	@Test
-	public void testCreateItinerary() {
-		try {
-			@SuppressWarnings("unused")
-			Itinerary itinerary = new Itinerary(new ArrayList<Leg>());
-			fail("An empty itinerary is not OK");
-		} catch (IllegalArgumentException iae) {
-			// Expected
-		}
+	void testCreateItinerary() {
+		assertThrows(IllegalArgumentException.class, () -> new Itinerary(new ArrayList<Leg>()));
 
-		try {
+		assertThrows(NullPointerException.class, () -> {
 			List<Leg> legs = null;
-			@SuppressWarnings("unused")
-			Itinerary itinerary = new Itinerary(legs);
-			fail("Null itinerary is not OK");
-		} catch (NullPointerException npe) {
-			// Expected
-		}
+			new Itinerary(legs);
+		});
 	}
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
@@ -26,7 +27,7 @@ public class Schedule implements Serializable {
 	public static final Schedule EMPTY = new Schedule();
 	
 	// TODO [Clean Code] Look into why cascade delete doesn't work.
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@JoinColumn(name = "voyage_id")
 	// TODO [Clean Code] Index as cm_index
 	@NotNull

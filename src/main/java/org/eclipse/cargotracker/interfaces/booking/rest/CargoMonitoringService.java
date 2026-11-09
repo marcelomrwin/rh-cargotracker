@@ -4,6 +4,7 @@ import java.util.List;
 
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -18,6 +19,7 @@ import org.eclipse.cargotracker.domain.model.cargo.Cargo;
 import org.eclipse.cargotracker.domain.model.cargo.CargoRepository;
 
 @ApplicationScoped
+@Transactional
 @Path("/cargo")
 public class CargoMonitoringService {
 

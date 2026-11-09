@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import jakarta.inject.Inject;
 
 import org.eclipse.cargotracker.domain.model.cargo.Cargo;
@@ -17,6 +18,7 @@ import org.eclipse.cargotracker.domain.model.voyage.VoyageNumber;
 import org.eclipse.cargotracker.domain.model.voyage.VoyageRepository;
 
 @ApplicationScoped
+@Transactional
 public class HandlingEventFactory implements Serializable {
 
 	private static final long serialVersionUID = 1L;

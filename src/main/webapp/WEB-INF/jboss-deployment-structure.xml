@@ -1,8 +1,0 @@
-<jboss-deployment-structure>
-    <deployment>
-        <dependencies>
-            <!-- <module name="org.apache.derby" /> -->
-            <module name="com.h2database.h2" />
-        </dependencies>
-    </deployment>
-</jboss-deployment-structure>

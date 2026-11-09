@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -18,6 +19,7 @@ import org.eclipse.cargotracker.domain.model.cargo.Leg;
 import org.eclipse.cargotracker.domain.model.cargo.TrackingId;
 
 @ApplicationScoped
+@Transactional
 public class JpaCargoRepository implements CargoRepository, Serializable {
 
 	private static final long serialVersionUID = 1L;

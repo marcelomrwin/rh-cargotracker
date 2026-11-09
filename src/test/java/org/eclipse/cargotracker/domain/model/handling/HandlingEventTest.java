@@ -1,7 +1,7 @@
 package org.eclipse.cargotracker.domain.model.handling;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -11,9 +11,9 @@ import org.eclipse.cargotracker.domain.model.cargo.RouteSpecification;
 import org.eclipse.cargotracker.domain.model.cargo.TrackingId;
 import org.eclipse.cargotracker.domain.model.location.SampleLocations;
 import org.eclipse.cargotracker.domain.model.voyage.SampleVoyages;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class HandlingEventTest {
+class HandlingEventTest {
 
 	private final TrackingId trackingId = new TrackingId("XYZ");
 	private final RouteSpecification routeSpecification = new RouteSpecification(SampleLocations.HONGKONG,
@@ -21,7 +21,7 @@ public class HandlingEventTest {
 	private final Cargo cargo = new Cargo(trackingId, routeSpecification);
 
 	@Test
-	public void testNewWithCarrierMovement() {
+	void testNewWithCarrierMovement() {
 		HandlingEvent event1 = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.LOAD,
 				SampleLocations.HONGKONG, SampleVoyages.CM003);
 		assertEquals(SampleLocations.HONGKONG, event1.getLocation());
@@ -30,35 +30,28 @@ public class HandlingEventTest {
 				SampleLocations.NEWYORK, SampleVoyages.CM003);
 		assertEquals(SampleLocations.NEWYORK, event2.getLocation());
 
-		// These event types prohibit a carrier movement association
 		for (HandlingEvent.Type type : Arrays.asList(HandlingEvent.Type.CLAIM, HandlingEvent.Type.RECEIVE,
 				HandlingEvent.Type.CUSTOMS)) {
-			try {
-				new HandlingEvent(cargo, new Date(), new Date(), type, SampleLocations.HONGKONG, SampleVoyages.CM003);
-				fail("Handling event type " + type + " prohibits carrier movement");
-			} catch (IllegalArgumentException expected) {
-			}
+			assertThrows(IllegalArgumentException.class,
+					() -> new HandlingEvent(cargo, new Date(), new Date(), type, SampleLocations.HONGKONG,
+							SampleVoyages.CM003));
 		}
 
-		// These event types requires a carrier movement association
 		for (HandlingEvent.Type type : Arrays.asList(HandlingEvent.Type.LOAD, HandlingEvent.Type.UNLOAD)) {
-			try {
-				new HandlingEvent(cargo, new Date(), new Date(), type, SampleLocations.HONGKONG, null);
-				fail("Handling event type " + type + " requires carrier movement");
-			} catch (NullPointerException expected) {
-			}
+			assertThrows(NullPointerException.class,
+					() -> new HandlingEvent(cargo, new Date(), new Date(), type, SampleLocations.HONGKONG, null));
 		}
 	}
 
 	@Test
-	public void testNewWithLocation() {
+	void testNewWithLocation() {
 		HandlingEvent event1 = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.CLAIM,
 				SampleLocations.HELSINKI);
 		assertEquals(SampleLocations.HELSINKI, event1.getLocation());
 	}
 
 	@Test
-	public void testCurrentLocationLoadEvent() throws Exception {
+	void testCurrentLocationLoadEvent() {
 		HandlingEvent event = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.LOAD,
 				SampleLocations.CHICAGO, SampleVoyages.CM004);
 
@@ -66,7 +59,7 @@ public class HandlingEventTest {
 	}
 
 	@Test
-	public void testCurrentLocationUnloadEvent() throws Exception {
+	void testCurrentLocationUnloadEvent() {
 		HandlingEvent ev = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.UNLOAD,
 				SampleLocations.HAMBURG, SampleVoyages.CM004);
 
@@ -74,7 +67,7 @@ public class HandlingEventTest {
 	}
 
 	@Test
-	public void testCurrentLocationReceivedEvent() throws Exception {
+	void testCurrentLocationReceivedEvent() {
 		HandlingEvent event = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.RECEIVE,
 				SampleLocations.CHICAGO);
 
@@ -82,7 +75,7 @@ public class HandlingEventTest {
 	}
 
 	@Test
-	public void testCurrentLocationClaimedEvent() throws Exception {
+	void testCurrentLocationClaimedEvent() {
 		HandlingEvent event = new HandlingEvent(cargo, new Date(), new Date(), HandlingEvent.Type.CLAIM,
 				SampleLocations.CHICAGO);
 
