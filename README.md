@@ -66,11 +66,14 @@ Access the application at: http://localhost:8080/cargo-tracker
 
 ### Migration path
 
-| Branch | Runtime | Java |
-|--------|---------|------|
-| `javaee7` | Payara 4.1 | 8 |
-| `jee7-eap7` | JBoss EAP 7.4 | 11 |
-| `jakartaee10-eap8` | JBoss EAP 8.1 | 17 |
+| Phase | Branch | Runtime | Java | Focus |
+|-------|--------|---------|------|-------|
+| — | `javaee7` | Payara 4.1 | 8 | Original application |
+| 1 | **`jee7-eap7`** | **JBoss EAP 7.4 (VM)** | **11** | **Migration to Red Hat platform (current)** |
+| 2 | `jakartaee10-eap8` | JBoss EAP 8.1 (VM) | 17 | Jakarta EE 10 migration |
+| 3 | `jakartaee10-eap8` | JBoss EAP 8.1 (OpenShift) | 17 | Containerization, cloud readiness |
+| 4 | `quarkus` | Quarkus 3.40.1 (local) | 17 | Cloud-native modernization |
+| 5 | `quarkus` | Quarkus 3.40.1 (OpenShift) | 17 | Deploy, performance comparison |
 
 ---
 
