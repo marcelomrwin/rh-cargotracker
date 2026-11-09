@@ -68,7 +68,7 @@ Access the application at: http://localhost:8080/cargo-tracker
 
 | Phase | Branch | Runtime | Java | Focus |
 |-------|--------|---------|------|-------|
-| — | `javaee7` | Payara 4.1 | 8 | Original application |
+| - | `javaee7` | Payara 4.1 | 8 | Original application |
 | 1 | **`jee7-eap7`** | **JBoss EAP 7.4 (VM)** | **11** | **Migration to Red Hat platform (current)** |
 | 2 | `jakartaee10-eap8` | JBoss EAP 8.1 (VM) | 17 | Jakarta EE 10 migration |
 | 3 | `jakartaee10-eap8` | JBoss EAP 8.1 (OpenShift) | 17 | Containerization, cloud readiness |
