@@ -495,6 +495,69 @@ These are the issues that caused runtime errors and required manual investigatio
 
 ---
 
+## OpenShift Deployment
+
+The Quarkus version is deployed using the `quarkus-openshift` extension with Docker build strategy.
+
+### Dependencies
+
+```xml
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-openshift</artifactId>
+</dependency>
+```
+
+### Configuration (`application.properties`)
+
+```properties
+# Production datasource (OCP PostgreSQL)
+%prod.quarkus.datasource.jdbc.url=jdbc:postgresql://cargo-tracker-pg:5432/ct-db
+%prod.quarkus.datasource.username=ct-user
+%prod.quarkus.datasource.password=ct-password
+
+# OpenShift deployment
+quarkus.openshift.build-strategy=docker
+quarkus.openshift.route.expose=true
+quarkus.kubernetes-client.trust-certs=true
+```
+
+### Deploy command
+
+```shell
+oc login --token=<token> --server=<server>
+oc project cargo-tracker-quarkus
+mvn clean package -Dquarkus.openshift.deploy=true -DskipTests
+```
+
+The extension builds the JAR locally, creates a Docker build on OCP, pushes the image to the internal registry, and creates Deployment + Service + Route automatically.
+
+### Application URL
+
+`http://cargo-tracker-cargo-tracker-quarkus.apps.ocp4.masales.cloud`
+
+---
+
+## Performance Comparison — EAP 8.1 vs Quarkus 3.40.1
+
+Measured on the same OpenShift cluster, same application, same PostgreSQL database configuration.
+
+| Metric | EAP 8.1 | Quarkus 3.40.1 | Improvement |
+|--------|---------|----------------|-------------|
+| Startup time | 55.6s | 5.9s | **9.4x faster** |
+| Memory usage | 583 Mi | 259 Mi | **2.3x less memory** |
+
+**How these were measured:**
+- **Startup:** From pod logs — EAP: `WFLYSRV0025: JBoss EAP 8.1 ... started in 55612ms`; Quarkus: `cargo-tracker ... started in 5.886s`
+- **Memory:** From container cgroup — `cat /sys/fs/cgroup/memory.current` on each pod
+
+Both deployments:
+- Project: OpenShift 4.x on `api.ocp4.masales.cloud:6443`
+- Database: PostgreSQL 15 (`registry.redhat.io/rhel9/postgresql-15`)
+- Java: OpenJDK 17
+
+---
+
 ## Running locally
 
 ```shell

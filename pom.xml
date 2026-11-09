@@ -118,6 +118,12 @@
 			<artifactId>quarkus-rest-client-jackson</artifactId>
 		</dependency>
 
+		<!-- OpenShift deployment -->
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-openshift</artifactId>
+		</dependency>
+
 		<!-- Servlet container - required for JSF/Faces -->
 		<dependency>
 			<groupId>io.quarkus</groupId>

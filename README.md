@@ -63,7 +63,8 @@ Tests also use Dev Services — no manual database setup needed.
 | UI | JSF/PrimeFaces served by EAP | `quarkus-primefaces` 3.12.5 (MyFaces + PrimeFaces 12) |
 | Web resources | `src/main/webapp/` | `src/main/resources/META-INF/resources/` |
 | Tests | JUnit 4 + Arquillian + ShrinkWrap | JUnit 5 + `@QuarkusTest` + `@TestTransaction` |
-| Startup | Application server boot + deployment | ~7 seconds (measured with Dev Services) |
+| Startup (OCP) | 55.6s (measured from pod log `WFLYSRV0025`) | 5.9s (measured from pod log `started in`) |
+| Memory (OCP) | 583 Mi (measured via `cgroup/memory.current`) | 259 Mi (measured via `cgroup/memory.current`) |
 
 ---
 
