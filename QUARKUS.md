@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the complete migration of the Cargo Tracker application from JBoss EAP 8.1 (Jakarta EE 10) to Quarkus 3.40.1 — a Kubernetes-native Java framework. Each step is documented with the rationale, what changed, and how.
+This document describes the complete migration of the Cargo Tracker application from JBoss EAP 8.1 (Jakarta EE 10) to Quarkus 3.40.1 - a Kubernetes-native Java framework. Each step is documented with the rationale, what changed, and how.
 
 **Source branch:** `jakartaee10-eap8` (EAP 8.1 / Jakarta EE 10 / Java 17)
 **Target branch:** `quarkus` (Quarkus 3.40.1.1 / Java 17)
@@ -36,11 +36,11 @@ mta-cli analyze \
 
 > **Note:** Do not specify `--source eap8`. The Quarkus ruleset targets any Java EE application regardless of source platform.
 
-The analysis identified **13 incidents** — mostly structural changes to `pom.xml`. However, MTA does not detect messaging, batch processing, UI, transaction management, or lazy loading issues, which represent the bulk of the effort.
+The analysis identified **13 incidents** - mostly structural changes to `pom.xml`. However, MTA does not detect messaging, batch processing, UI, transaction management, or lazy loading issues, which represent the bulk of the effort.
 
 ---
 
-## Step 1 — Foundation: Maven project structure
+## Step 1 - Foundation: Maven project structure
 
 Transform `pom.xml` from a Jakarta EE WAR project (managed by EAP BOM) to a Quarkus project.
 
@@ -71,15 +71,15 @@ Transform `pom.xml` from a Jakarta EE WAR project (managed by EAP BOM) to a Quar
 
 ### Key difference
 
-In EAP, all Jakarta EE APIs are `provided` by the application server. In Quarkus, there is no application server — each capability is an explicit extension dependency.
+In EAP, all Jakarta EE APIs are `provided` by the application server. In Quarkus, there is no application server - each capability is an explicit extension dependency.
 
 ### Third-party dependency upgrade
 
-`commons-lang3` was upgraded from `3.4` to `3.17.0` — the old version was missing classes required by the JUnit 5 platform at runtime (`UncheckedException`).
+`commons-lang3` was upgraded from `3.4` to `3.17.0` - the old version was missing classes required by the JUnit 5 platform at runtime (`UncheckedException`).
 
 ---
 
-## Step 2 — JPA / Domain layer migration
+## Step 2 - JPA / Domain layer migration
 
 ### What changed
 
@@ -87,7 +87,7 @@ In EAP, all Jakarta EE APIs are `provided` by the application server. In Quarkus
 |-------------------|-----------------|
 | `@PersistenceContext EntityManager em` | `@Inject EntityManager em` |
 | `persistence.xml` with JTA datasource | `application.properties` |
-| `hibernate.enable_lazy_load_no_trans=true` | Not supported — collections changed to EAGER (see Step 8) |
+| `hibernate.enable_lazy_load_no_trans=true` | Not supported - collections changed to EAGER (see Step 8) |
 
 ### Files
 
@@ -109,14 +109,14 @@ quarkus.hibernate-orm.database.generation=drop-and-create
 
 ### 4 repositories changed
 
-- `JpaCargoRepository` — `@PersistenceContext` → `@Inject`
-- `JpaHandlingEventRepository` — same
-- `JpaLocationRepository` — same
-- `JpaVoyageRepository` — same
+- `JpaCargoRepository` - `@PersistenceContext` → `@Inject`
+- `JpaHandlingEventRepository` - same
+- `JpaLocationRepository` - same
+- `JpaVoyageRepository` - same
 
 ---
 
-## Step 3 — EJB to CDI migration
+## Step 3 - EJB to CDI migration
 
 Quarkus does not support EJBs. All `@Stateless`, `@Singleton`, and `@Schedule` annotations must be replaced with CDI equivalents.
 
@@ -130,7 +130,7 @@ Quarkus does not support EJBs. All `@Stateless`, `@Singleton`, and `@Schedule` a
 
 ### Critical: `@Transactional` is mandatory
 
-In EAP, `@Stateless` provides implicit container-managed transactions — every method runs in a transaction by default. In Quarkus with `@ApplicationScoped`, **there is no implicit transaction**. Without `@Transactional`, any JPA operation outside a transaction will fail silently or throw `LazyInitializationException`.
+In EAP, `@Stateless` provides implicit container-managed transactions - every method runs in a transaction by default. In Quarkus with `@ApplicationScoped`, **there is no implicit transaction**. Without `@Transactional`, any JPA operation outside a transaction will fail silently or throw `LazyInitializationException`.
 
 `@Transactional` was added to **11 beans**:
 
@@ -156,13 +156,13 @@ In EAP, `@Stateless` provides implicit container-managed transactions — every 
 
 ### REST endpoints (3 classes)
 
-`CargoMonitoringService`, `HandlingReportService`, `GraphTraversalService` — dropped `@Stateless`, added `@ApplicationScoped`. The `RestConfiguration` class (JAX-RS `Application`) was replaced by `quarkus.rest.path=/rest` in `application.properties`.
+`CargoMonitoringService`, `HandlingReportService`, `GraphTraversalService` - dropped `@Stateless`, added `@ApplicationScoped`. The `RestConfiguration` class (JAX-RS `Application`) was replaced by `quarkus.rest.path=/rest` in `application.properties`.
 
 > **CDI strictness:** Quarkus validates CDI at build time. Circular dependencies and ambiguous injection points that work silently in EAP will cause compile-time errors in Quarkus.
 
 ---
 
-## Step 4 — Messaging: JMS to CDI Events
+## Step 4 - Messaging: JMS to CDI Events
 
 ### Why CDI Events instead of JMS?
 
@@ -174,7 +174,7 @@ The original application uses JMS (5 queues, 1 producer, 5 MDB consumers) manage
 | Artemis JMS via `quarkus-artemis-jms` | Closest to original architecture | Requires running Artemis broker |
 | Reactive Messaging (SmallRye) | Cloud-native, backpressure | Biggest rewrite, different paradigm |
 
-**Decision:** CDI Events — the demo runs locally without external infrastructure. For production, Artemis JMS or Reactive Messaging would be appropriate.
+**Decision:** CDI Events - the demo runs locally without external infrastructure. For production, Artemis JMS or Reactive Messaging would be appropriate.
 
 ### What changed
 
@@ -220,13 +220,13 @@ public record CargoDeliveredEvent(String trackingId) {}
 </dependency>
 ```
 
-#### `web.xml` — removed JMS destinations
+#### `web.xml` - removed JMS destinations
 
-All 5 `<jms-destination>` entries and the `<resource-ref>` for the datasource were removed — Quarkus manages these via `application.properties` and CDI.
+All 5 `<jms-destination>` entries and the `<resource-ref>` for the datasource were removed - Quarkus manages these via `application.properties` and CDI.
 
 ---
 
-## Step 5 — Jakarta Batch to plain Java
+## Step 5 - Jakarta Batch to plain Java
 
 ### Why?
 
@@ -234,16 +234,16 @@ Quarkus does not support Jakarta Batch (JSR 352). The file processing subsystem 
 
 ### What changed
 
-The entire Jakarta Batch subsystem was **consolidated into `UploadDirectoryScanner`** — a single `@ApplicationScoped` bean that does everything the batch job did:
+The entire Jakarta Batch subsystem was **consolidated into `UploadDirectoryScanner`** - a single `@ApplicationScoped` bean that does everything the batch job did:
 
-| Before (EAP 8.1) — 6 files | After (Quarkus) — 1 file |
+| Before (EAP 8.1) - 6 files | After (Quarkus) - 1 file |
 |-----------------------------|--------------------------|
-| `EventFilesProcessorJob.xml` — batch job descriptor | Deleted |
-| `EventItemReader` — reads CSV lines, parses events | Logic moved to `UploadDirectoryScanner.parseLine()` |
-| `EventItemWriter` — writes to `ApplicationEvents` + archive | Logic moved to `UploadDirectoryScanner.processFile()` |
-| `FileProcessorJobListener` — logs job start/end | Logging in `processFiles()` |
-| `LineParseExceptionListener` — writes failed lines | Logic moved to `writeFailedLine()` |
-| `EventFilesCheckpoint` — batch checkpoint state | Deleted (not needed without batch resumability) |
+| `EventFilesProcessorJob.xml` - batch job descriptor | Deleted |
+| `EventItemReader` - reads CSV lines, parses events | Logic moved to `UploadDirectoryScanner.parseLine()` |
+| `EventItemWriter` - writes to `ApplicationEvents` + archive | Logic moved to `UploadDirectoryScanner.processFile()` |
+| `FileProcessorJobListener` - logs job start/end | Logging in `processFiles()` |
+| `LineParseExceptionListener` - writes failed lines | Logic moved to `writeFailedLine()` |
+| `EventFilesCheckpoint` - batch checkpoint state | Deleted (not needed without batch resumability) |
 
 The `@Scheduled(every = "2m")` annotation (from Step 3) triggers the processing. The flow is:
 
@@ -256,7 +256,7 @@ The `@Scheduled(every = "2m")` annotation (from Step 3) triggers the processing.
 
 ---
 
-## Step 6 — External routing service: JNDI to ConfigProperty
+## Step 6 - External routing service: JNDI to ConfigProperty
 
 ### What changed
 
@@ -274,7 +274,7 @@ cargo-tracker.graph-traversal-url=http://localhost:8080/rest/graph-traversal/sho
 
 ---
 
-## Step 7 — JSF / PrimeFaces UI on Quarkus
+## Step 7 - JSF / PrimeFaces UI on Quarkus
 
 ### The challenge
 
@@ -284,7 +284,7 @@ Quarkus has no built-in JSF support. The Cargo Tracker UI consists of 10 backing
 
 The [Quarkiverse PrimeFaces extension](https://docs.quarkiverse.io/quarkus-primefaces/dev/) integrates Apache MyFaces (JSF implementation) and PrimeFaces into Quarkus.
 
-**Version chosen:** `3.12.5` — this keeps PrimeFaces 12 (same version as EAP 8), avoiding breaking changes from PrimeFaces 13+ (package renames, API changes in Dashboard model, etc).
+**Version chosen:** `3.12.5` - this keeps PrimeFaces 12 (same version as EAP 8), avoiding breaking changes from PrimeFaces 13+ (package renames, API changes in Dashboard model, etc).
 
 ### Dependencies added to `pom.xml`
 
@@ -342,9 +342,9 @@ Quarkus/Undertow does not honor `<welcome-file>` in `web.xml` for JSF views. A s
 | `<env-entry>` for GraphTraversalUrl | Replaced by `@ConfigProperty` |
 | `glassfish-web.xml`, `jboss-web.xml`, `jboss-deployment-structure.xml`, `payara-resources.xml` | App-server-specific configs not needed in Quarkus |
 
-### `@Named` with dots — EL resolution difference
+### `@Named` with dots - EL resolution difference
 
-EAP/Mojarra allows dots in `@Named` values (e.g., `@Named("admin.track")`) and resolves `#{admin.track.trackingId}` as a literal bean name lookup. Quarkus/MyFaces interprets the dot as property navigation — it looks for a bean named `admin` and navigates to property `track`.
+EAP/Mojarra allows dots in `@Named` values (e.g., `@Named("admin.track")`) and resolves `#{admin.track.trackingId}` as a literal bean name lookup. Quarkus/MyFaces interprets the dot as property navigation - it looks for a bean named `admin` and navigates to property `track`.
 
 | Before | After | Files affected |
 |--------|-------|----------------|
@@ -353,7 +353,7 @@ EAP/Mojarra allows dots in `@Named` values (e.g., `@Named("admin.track")`) and r
 
 All EL expressions in the corresponding XHTML files were updated (e.g., `#{admin.track.cargo}` → `#{adminTrack.cargo}`).
 
-### `<f:metadata>` placement — MyFaces strictness
+### `<f:metadata>` placement - MyFaces strictness
 
 MyFaces enforces that `<f:metadata>` must be a direct child of `UIViewRoot`. In EAP/Mojarra, `<f:metadata>` inside `<ui:define name="content">` works because Mojarra is lenient. MyFaces rejects it.
 
@@ -380,19 +380,19 @@ MyFaces enforces that `<f:metadata>` must be a direct child of `UIViewRoot`. In 
 - Template views (use `<ui:define name="metadata">`): `show.xhtml`, `route.xhtml`, `selectItinerary.xhtml`
 - Standalone dialog views (moved `<f:metadata>` before `<h:head>`): `changeDestination.xhtml`, `changeArrivalDeadlineDate.xhtml`
 
-### `web.xml` dual location — dev mode vs packaged JAR
+### `web.xml` dual location - dev mode vs packaged JAR
 
-In `quarkus:dev` mode, the Quarkus reads `web.xml` from the filesystem at `target/classes/META-INF/resources/WEB-INF/web.xml`. In a packaged JAR (container/OCP), the Quarkus Undertow extension reads servlet context-params from **`META-INF/web.xml`** on the classpath — confirmed in the [MyFacesProcessor.java source code](https://github.com/apache/myfaces/blob/main/extensions/quarkus/deployment/src/main/java/org/apache/myfaces/core/extensions/quarkus/deployment/MyFacesProcessor.java).
+In `quarkus:dev` mode, the Quarkus reads `web.xml` from the filesystem at `target/classes/META-INF/resources/WEB-INF/web.xml`. In a packaged JAR (container/OCP), the Quarkus Undertow extension reads servlet context-params from **`META-INF/web.xml`** on the classpath - confirmed in the [MyFacesProcessor.java source code](https://github.com/apache/myfaces/blob/main/extensions/quarkus/deployment/src/main/java/org/apache/myfaces/core/extensions/quarkus/deployment/MyFacesProcessor.java).
 
 The `web.xml` must exist in **two** locations:
-- `src/main/resources/META-INF/web.xml` — for Undertow/MyFaces to read context-params (servlet configuration)
-- `src/main/resources/META-INF/resources/WEB-INF/web.xml` — for JSF to serve as a web resource (Faces Servlet mapping, etc.)
+- `src/main/resources/META-INF/web.xml` - for Undertow/MyFaces to read context-params (servlet configuration)
+- `src/main/resources/META-INF/resources/WEB-INF/web.xml` - for JSF to serve as a web resource (Faces Servlet mapping, etc.)
 
 Both files must be kept in sync.
 
-### JSF Faces Flows — not supported in packaged mode
+### JSF Faces Flows - not supported in packaged mode
 
-JSF Faces Flows (`@FlowScoped` + `booking-flow.xml`) work in `quarkus:dev` mode but **fail in packaged JAR/container** mode. The MyFaces Quarkus extension does not scan `META-INF/resources/` for flow definition XML files (`*-flow.xml`) at build time — it only discovers `.xhtml` views. In dev mode, the runtime scans the filesystem directly, which works.
+JSF Faces Flows (`@FlowScoped` + `booking-flow.xml`) work in `quarkus:dev` mode but **fail in packaged JAR/container** mode. The MyFaces Quarkus extension does not scan `META-INF/resources/` for flow definition XML files (`*-flow.xml`) at build time - it only discovers `.xhtml` views. In dev mode, the runtime scans the filesystem directly, which works.
 
 **Fix:** Replace `@FlowScoped` with `@SessionScoped` and convert flow navigation to direct URL navigation:
 
@@ -406,7 +406,7 @@ JSF Faces Flows (`@FlowScoped` + `booking-flow.xml`) work in `quarkus:dev` mode 
 
 ---
 
-## Step 8 — Lazy loading: EAGER fetch for embedded collections
+## Step 8 - Lazy loading: EAGER fetch for embedded collections
 
 ### Why?
 
@@ -421,15 +421,15 @@ Two `@Embeddable` value objects have `@OneToMany` collections that are always ne
 | `Itinerary` | `legs` | `@OneToMany(cascade = ALL)` (default LAZY) | `@OneToMany(cascade = ALL, fetch = EAGER)` |
 | `Schedule` | `carrierMovements` | `@OneToMany(cascade = ALL, orphanRemoval = true)` (default LAZY) | `@OneToMany(cascade = ALL, orphanRemoval = true, fetch = EAGER)` |
 
-These are semantically correct — an itinerary without legs and a schedule without movements are meaningless as standalone objects.
+These are semantically correct - an itinerary without legs and a schedule without movements are meaningless as standalone objects.
 
 ---
 
-## Step 9 — Test migration: JUnit 4 / Arquillian → JUnit 5 / `@QuarkusTest`
+## Step 9 - Test migration: JUnit 4 / Arquillian → JUnit 5 / `@QuarkusTest`
 
 ### Why?
 
-The original tests used JUnit 4 (`org.junit.Test`) with Arquillian (`@RunWith(Arquillian.class)`, `@Deployment`, ShrinkWrap). Quarkus uses JUnit 5 with `@QuarkusTest` — Arquillian and ShrinkWrap are not supported.
+The original tests used JUnit 4 (`org.junit.Test`) with Arquillian (`@RunWith(Arquillian.class)`, `@Deployment`, ShrinkWrap). Quarkus uses JUnit 5 with `@QuarkusTest` - Arquillian and ShrinkWrap are not supported.
 
 ### Test dependencies in `pom.xml`
 
@@ -439,7 +439,7 @@ The original tests used JUnit 4 (`org.junit.Test`) with Arquillian (`@RunWith(Ar
 | `arquillian-junit-container` | Removed |
 | `shrinkwrap-resolver-impl-maven` | Removed |
 | `quarkus-junit` | `quarkus-junit5` |
-| — | `rest-assured` (kept) |
+| - | `rest-assured` (kept) |
 
 ### Dead code removed
 
@@ -448,13 +448,13 @@ The original tests used JUnit 4 (`org.junit.Test`) with Arquillian (`@RunWith(Ar
 | `HandlingEventServiceTest` | All code commented out, no `@Test` |
 | `ExternalRoutingServiceTest` | All code commented out, no `@Test` |
 | `CargoLifecycleScenarioTest` | All code commented out, no `@Test` |
-| `BookingServiceTestDataGenerator` | `@Singleton @Startup` EJB test helper — `SampleDataGenerator` already seeds data in `@QuarkusTest` |
-| `arquillian.xml` | Payara container config — not needed |
-| `test-web.xml` | JNDI env-entry + Derby datasource for Arquillian — Dev Services replaces |
+| `BookingServiceTestDataGenerator` | `@Singleton @Startup` EJB test helper - `SampleDataGenerator` already seeds data in `@QuarkusTest` |
+| `arquillian.xml` | Payara container config - not needed |
+| `test-web.xml` | JNDI env-entry + Derby datasource for Arquillian - Dev Services replaces |
 
 ### 5 unit tests migrated (JUnit 4 → 5)
 
-Pure domain model tests — no container needed:
+Pure domain model tests - no container needed:
 
 | Test | Changes |
 |------|---------|
@@ -466,15 +466,15 @@ Pure domain model tests — no container needed:
 
 ### 1 integration test rewritten (Arquillian → `@QuarkusTest`)
 
-`BookingServiceTest` — tests the complete booking lifecycle (register, route, assign, change destination, change deadline):
+`BookingServiceTest` - tests the complete booking lifecycle (register, route, assign, change destination, change deadline):
 
 | Before | After |
 |--------|-------|
 | `@RunWith(Arquillian.class)` | `@QuarkusTest` |
-| `@Deployment` + `ShrinkWrap.create(WebArchive.class)` | Removed — `@QuarkusTest` boots the full app |
+| `@Deployment` + `ShrinkWrap.create(WebArchive.class)` | Removed - `@QuarkusTest` boots the full app |
 | `@PersistenceContext EntityManager` | `@Inject EntityManager` |
 | `@InSequence(1..5)` across 5 methods | Single `@TestTransaction` method with sequential steps |
-| `BookingServiceTestDataGenerator` EJB | Removed — `SampleDataGenerator` seeds data automatically |
+| `BookingServiceTestDataGenerator` EJB | Removed - `SampleDataGenerator` seeds data automatically |
 
 ### Test configuration
 
@@ -488,12 +488,12 @@ In test mode, Quarkus runs on a random port. The graph traversal URL must use `$
 ### Result
 
 ```
-Tests run: 25, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS
+Tests run: 25, Failures: 0, Errors: 0, Skipped: 0 - BUILD SUCCESS
 ```
 
 ---
 
-## Summary — What was migrated
+## Summary - What was migrated
 
 | Area | EAP 8.1 | Quarkus 3.40.1 | Files changed |
 |------|---------|----------------|---------------|
@@ -519,19 +519,19 @@ Tests run: 25, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS
 | Tests | JUnit 4 + Arquillian + ShrinkWrap | JUnit 5 + `@QuarkusTest` + `@TestTransaction` | 6 tests migrated, 4 deleted |
 | Badge | "JBoss EAP 8.1" (red) | "Quarkus 3.40" (blue) | 2 templates |
 
-## Gotchas — things MTA does not detect
+## Gotchas - things MTA does not detect
 
 These are the issues that caused runtime errors and required manual investigation:
 
-1. **Missing `@Transactional`** — EJB transactions are implicit; Quarkus requires explicit `@Transactional`. Without it, JPA operations fail silently or throw exceptions during JSF render.
-2. **`hibernate.enable_lazy_load_no_trans`** — Not supported in Quarkus. Lazy collections accessed outside transactions cause `LazyInitializationException`. Fix: change to `FetchType.EAGER` or ensure access within transaction scope.
-3. **`@Named` with dots** — Mojarra treats `admin.track` as a literal bean name. MyFaces interprets it as property navigation (`admin` → `track`). Fix: rename to camelCase.
-4. **`<f:metadata>` placement** — Mojarra allows `<f:metadata>` anywhere. MyFaces requires it as a direct child of `UIViewRoot`. Fix: use `<ui:define name="metadata">` in templates.
-5. **`src/main/webapp/` ignored** — Quarkus serves web content from `META-INF/resources/`, not `webapp/`. All views and static files must be moved.
-6. **`<welcome-file>` for `.xhtml`** — Undertow in Quarkus does not process JSF welcome files. Fix: static `index.html` with meta redirect.
-7. **`<mime-mapping>` conflicts** — PrimeFaces `web-fragment.xml` declares font mime-mappings. Duplicates in `web.xml` cause NPE in Undertow.
-8. **`web.xml` dual location** — In dev mode, Quarkus reads `web.xml` from the filesystem. In packaged JAR, Undertow reads context-params from `META-INF/web.xml`, not from `META-INF/resources/WEB-INF/web.xml`. The file must exist in both locations.
-9. **JSF Faces Flows broken in container** — The MyFaces Quarkus extension does not scan `META-INF/resources/` for flow definition XML files. `@FlowScoped` + `booking-flow.xml` works in dev mode (filesystem scanning) but fails in JAR/container. Fix: replace with `@SessionScoped` and direct URL navigation.
+1. **Missing `@Transactional`** - EJB transactions are implicit; Quarkus requires explicit `@Transactional`. Without it, JPA operations fail silently or throw exceptions during JSF render.
+2. **`hibernate.enable_lazy_load_no_trans`** - Not supported in Quarkus. Lazy collections accessed outside transactions cause `LazyInitializationException`. Fix: change to `FetchType.EAGER` or ensure access within transaction scope.
+3. **`@Named` with dots** - Mojarra treats `admin.track` as a literal bean name. MyFaces interprets it as property navigation (`admin` → `track`). Fix: rename to camelCase.
+4. **`<f:metadata>` placement** - Mojarra allows `<f:metadata>` anywhere. MyFaces requires it as a direct child of `UIViewRoot`. Fix: use `<ui:define name="metadata">` in templates.
+5. **`src/main/webapp/` ignored** - Quarkus serves web content from `META-INF/resources/`, not `webapp/`. All views and static files must be moved.
+6. **`<welcome-file>` for `.xhtml`** - Undertow in Quarkus does not process JSF welcome files. Fix: static `index.html` with meta redirect.
+7. **`<mime-mapping>` conflicts** - PrimeFaces `web-fragment.xml` declares font mime-mappings. Duplicates in `web.xml` cause NPE in Undertow.
+8. **`web.xml` dual location** - In dev mode, Quarkus reads `web.xml` from the filesystem. In packaged JAR, Undertow reads context-params from `META-INF/web.xml`, not from `META-INF/resources/WEB-INF/web.xml`. The file must exist in both locations.
+9. **JSF Faces Flows broken in container** - The MyFaces Quarkus extension does not scan `META-INF/resources/` for flow definition XML files. `@FlowScoped` + `booking-flow.xml` works in dev mode (filesystem scanning) but fails in JAR/container. Fix: replace with `@SessionScoped` and direct URL navigation.
 
 ---
 
@@ -578,7 +578,7 @@ The extension builds the JAR locally, creates a Docker build on OCP, pushes the 
 
 ---
 
-## Performance Comparison — EAP 8.1 vs Quarkus 3.40.1
+## Performance Comparison - EAP 8.1 vs Quarkus 3.40.1
 
 Measured on the same OpenShift cluster, same application, same PostgreSQL database configuration.
 
@@ -588,8 +588,8 @@ Measured on the same OpenShift cluster, same application, same PostgreSQL databa
 | Memory usage | 583 Mi | 259 Mi | **2.3x less memory** |
 
 **How these were measured:**
-- **Startup:** From pod logs — EAP: `WFLYSRV0025: JBoss EAP 8.1 ... started in 55612ms`; Quarkus: `cargo-tracker ... started in 5.886s`
-- **Memory:** From container cgroup — `cat /sys/fs/cgroup/memory.current` on each pod
+- **Startup:** From pod logs - EAP: `WFLYSRV0025: JBoss EAP 8.1 ... started in 55612ms`; Quarkus: `cargo-tracker ... started in 5.886s`
+- **Memory:** From container cgroup - `cat /sys/fs/cgroup/memory.current` on each pod
 
 Both deployments:
 - Project: OpenShift 4.x on `api.ocp4.masales.cloud:6443`

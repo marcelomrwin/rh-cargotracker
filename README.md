@@ -2,7 +2,7 @@
 
 > **This branch (`quarkus`) is the Quarkus migration of the Cargo Tracker application.**
 > Starting point: [`jakartaee10-eap8`](https://github.com/marcelomrwin/rh-cargotracker/tree/jakartaee10-eap8) (EAP 8.1 / Jakarta EE 10 running on OpenShift).
-> Target: **Quarkus 3.40.1.1** — cloud-native, no application server required.
+> Target: **Quarkus 3.40.1.1** - cloud-native, no application server required.
 
 ## Migration documentation
 
@@ -37,13 +37,13 @@ mvn test
 # 25 tests (5 unit test classes + 1 integration test with @QuarkusTest)
 ```
 
-Tests also use Dev Services — no manual database setup needed.
+Tests also use Dev Services - no manual database setup needed.
 
 ## Migration path
 
 | Phase | Branch | Runtime | Java | Focus |
 |-------|--------|---------|------|-------|
-| — | `javaee7` | Payara 4.1 | 8 | Original application |
+| - | `javaee7` | Payara 4.1 | 8 | Original application |
 | 1 | `jee7-eap7` | JBoss EAP 7.4 (VM) | 11 | Migration to Red Hat platform |
 | 2 | `jakartaee10-eap8` | JBoss EAP 8.1 (VM) | 17 | Jakarta EE 10 migration (MTA) |
 | 3 | `jakartaee10-eap8` | JBoss EAP 8.1 (OpenShift) | 17 | Containerization, cloud readiness |
