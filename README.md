@@ -63,7 +63,7 @@ Tests also use Dev Services — no manual database setup needed.
 | UI | JSF/PrimeFaces served by EAP | `quarkus-primefaces` 3.12.5 (MyFaces + PrimeFaces 12) |
 | Web resources | `src/main/webapp/` | `src/main/resources/META-INF/resources/` |
 | Tests | JUnit 4 + Arquillian + ShrinkWrap | JUnit 5 + `@QuarkusTest` + `@TestTransaction` |
-| Startup | ~60 seconds | ~7 seconds |
+| Startup | Application server boot + deployment | ~7 seconds (measured with Dev Services) |
 
 ---
 
