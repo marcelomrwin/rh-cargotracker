@@ -9,6 +9,16 @@ This document describes the complete migration of the Cargo Tracker application 
 
 **Target version:** `io.quarkus.platform:quarkus-bom:3.40.1.1`
 
+This document covers **Phases 4 and 5** of the full modernization journey:
+
+| Phase | From | To | Focus |
+|-------|------|----|-------|
+| 1 | Payara 4.1 (Java EE 7) | EAP 7.4 (VM) | Migration to Red Hat platform |
+| 2 | EAP 7.4 (VM) | EAP 8.1 (VM) | Jakarta EE 10 migration (MTA) |
+| 3 | EAP 8.1 (VM) | EAP 8.1 (OpenShift) | Containerization, cloud readiness |
+| **4** | **EAP 8.1 (OCP)** | **Quarkus 3.40.1 (local)** | **Cloud-native modernization** |
+| **5** | **Quarkus (local)** | **Quarkus (OpenShift)** | **Deploy, performance comparison** |
+
 ---
 
 ## MTA Analysis

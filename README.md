@@ -41,12 +41,14 @@ Tests also use Dev Services — no manual database setup needed.
 
 ## Migration path
 
-| Branch | Runtime | Java | Status |
-|--------|---------|------|--------|
-| `javaee7` | Payara 4.1 | 8 | Original |
-| `jee7-eap7` | JBoss EAP 7.4 | 11 | Phase 1 |
-| `jakartaee10-eap8` | JBoss EAP 8.1 | 17 | Phase 2 |
-| **`quarkus`** | **Quarkus 3.40.1** | **17** | **Phase 3 (current)** |
+| Phase | Branch | Runtime | Java | Focus |
+|-------|--------|---------|------|-------|
+| — | `javaee7` | Payara 4.1 | 8 | Original application |
+| 1 | `jee7-eap7` | JBoss EAP 7.4 (VM) | 11 | Migration to Red Hat platform |
+| 2 | `jakartaee10-eap8` | JBoss EAP 8.1 (VM) | 17 | Jakarta EE 10 migration (MTA) |
+| 3 | `jakartaee10-eap8` | JBoss EAP 8.1 (OpenShift) | 17 | Containerization, cloud readiness |
+| 4 | **`quarkus`** | **Quarkus 3.40.1 (local)** | **17** | **Cloud-native modernization** |
+| 5 | **`quarkus`** | **Quarkus 3.40.1 (OpenShift)** | **17** | **Deploy, performance comparison** |
 
 ## What changed from EAP 8.1
 
