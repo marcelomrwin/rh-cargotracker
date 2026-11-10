@@ -7,7 +7,7 @@ Create a new project:
 
     oc new-project cargo-tracker-eap8 \
       --display-name="Cargo Tracker App" \
-      --description="Reference java ee 7 application running on top of EAP 8.1"
+      --description="Cargo Tracker application migrated to Jakarta EE 10 on JBoss EAP 8.1"
 
 > [!NOTE]
 > If you use a different name, update the `KUBERNETES_NAMESPACE` variable in `ocp/kustomization.yaml` accordingly.

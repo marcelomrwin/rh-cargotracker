@@ -109,7 +109,7 @@ After:
 
 ### EAP 8 XML (`eap8-xml` recipe)
 
-Updated `web.xml` to use Jakarta EE 6.0 namespace (EAP 8 compatible).
+Updated `web.xml` to use Jakarta Servlet 6.0 namespace (EAP 8 compatible).
 
 Before:
 ```xml
@@ -174,7 +174,7 @@ Primefaces was upgraded from `8.0` to `12.0.0` with the `jakarta` classifier, as
 </dependency>
 ```
 
-The UI theme was also changed from `omega` (retired in Primefaces 12) to `saga`.
+The UI theme was also changed from `omega` (removed in PrimeFaces 10) to `saga`.
 
 ### Messaging (MDB annotations)
 
@@ -192,7 +192,7 @@ The UI theme was also changed from `omega` (retired in Primefaces 12) to `saga`.
 
 ### CDI descriptor (beans.xml)
 
-Updated to Jakarta EE 3.0 namespace.
+Updated to Jakarta CDI 3.0 schema.
 
 > [!CAUTION]
 > The `bean-discovery-mode="all"` attribute is now **required**. CDI 4.0 changed the default from `all` to `annotated`, which is a silent breaking change. Without it, beans that are not annotated with a scope annotation will not be discovered.
@@ -231,7 +231,7 @@ The batch job XML namespace was updated to Jakarta version:
 
 ### @PrivateOwned removal
 
-The `@PrivateOwned` annotation (EclipseLink-specific) was removed. It has no equivalent in Hibernate (the JPA provider used by EAP 8) and has no functional side effects in this application.
+The `@PrivateOwned` annotation (EclipseLink-specific) was removed. The standard JPA equivalent is `orphanRemoval = true` on `@OneToMany` or `@OneToOne` (the JPA provider used by EAP 8) and has no functional side effects in this application.
 
 ---
 
