@@ -76,16 +76,20 @@ Open `index.html` in a browser to review the findings.
 
 ## Analysis results summary
 
-The analysis of `cargo-tracker.war` (branch `jee7-eap7`) against targets `eap8` and `eap81` identified **319 incidents** across the following categories:
+The analysis of `cargo-tracker.war` (branch `jee7-eap7`) against targets `eap8` and `eap81` identified **319 incidents** (verified from the MTA report data):
 
 | Incidents | Category |
 |---------:|---------|
 | 276 | Java imports: `javax.*` packages must be replaced with `jakarta.*` equivalents |
-| 14 | XML deployment descriptors: Java EE namespaces must be updated to Jakarta EE |
+| 14 | XML descriptors: replace Java EE namespace, schemaLocation and version with Jakarta |
+| 7 | XML descriptors: replace Java EE version with Jakarta equivalent |
+| 6 | XML descriptors: replace Java EE XSD with Jakarta equivalent |
 | 6 | Hibernate: implicit name determination for sequences/tables has changed |
 | 5 | `web.xml`: references to `javax`-prefixed class names must be updated |
-| 9 | Maven: `pom.xml` dependencies and namespaces referencing `javax` must be updated |
+| 2 | Persistence: replace Java EE persistence namespace with Jakarta equivalent |
 | 1 | Maven: `javax.activation` groupId must be replaced |
+| 1 | Maven: `javax` groupId replaced by `jakarta.platform` |
+| 1 | Maven: `javaee-api` artifactId replaced by `jakarta.jakartaee-api` |
 
 For the complete list of issues with file locations and remediation guidance, see the [MTA report](mta-report/index.html).
 
