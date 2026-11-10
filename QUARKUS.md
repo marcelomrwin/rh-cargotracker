@@ -92,7 +92,7 @@ Transform `pom.xml` from a Jakarta EE WAR project (managed by EAP BOM) to a Quar
 |-------------------|-----------------|
 | `@PersistenceContext EntityManager em` | `@Inject EntityManager em` |
 | `persistence.xml` with JTA datasource | `application.properties` |
-| `hibernate.enable_lazy_load_no_trans=true` | Not supported - collections changed to EAGER (see Step 8) |
+| `hibernate.enable_lazy_load_no_trans=true` | Not functional in Quarkus - collections changed to EAGER (see Step 8) |
 
 ### Files
 
@@ -433,7 +433,7 @@ Both files must be kept in sync.
 ### Why?
 
 > [!WARNING]
-> EAP's `persistence.xml` had `hibernate.enable_lazy_load_no_trans=true`, which allowed lazy-loaded collections to be accessed outside a Hibernate session. **Quarkus does not support this property.** When JSF views access lazy collections during the render phase (outside the transaction), a `LazyInitializationException` occurs. This error only appears at runtime when a user navigates to a page that renders the lazy collection.
+> EAP's `persistence.xml` had `hibernate.enable_lazy_load_no_trans=true`, which allowed lazy-loaded collections to be accessed outside a Hibernate session. **This property is not functional in Quarkus** (it can be set but has no effect because Quarkus does not register the SessionFactory in the SessionFactoryRegistry needed for temporary sessions). When JSF views access lazy collections during the render phase (outside the transaction), a `LazyInitializationException` occurs. This error only appears at runtime when a user navigates to a page that renders the lazy collection.
 
 ### What changed
 
@@ -461,7 +461,7 @@ The original tests used JUnit 4 (`org.junit.Test`) with Arquillian (`@RunWith(Ar
 | `junit:junit:4.13.1` | Removed (JUnit 5 comes via `quarkus-junit5`) |
 | `arquillian-junit-container` | Removed |
 | `shrinkwrap-resolver-impl-maven` | Removed |
-| `quarkus-junit` | `quarkus-junit5` |
+| (no Quarkus test framework) | `quarkus-junit5` (provides `@QuarkusTest`, `@TestTransaction`) |
 | - | `rest-assured` (kept) |
 
 ### Dead code removed
@@ -553,7 +553,7 @@ These are the issues that caused runtime errors and required manual investigatio
 
 > [!WARNING]
 > **2. `hibernate.enable_lazy_load_no_trans`**
-> Not supported in Quarkus. Lazy collections accessed outside transactions cause `LazyInitializationException`. Fix: change to `FetchType.EAGER` or ensure access within transaction scope.
+> Not functional in Quarkus (the property can be set but has no effect). Lazy collections accessed outside transactions cause `LazyInitializationException`. Fix: change to `FetchType.EAGER` or ensure access within transaction scope.
 
 > [!WARNING]
 > **3. `@Named` with dots**
