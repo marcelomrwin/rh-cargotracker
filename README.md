@@ -1,5 +1,8 @@
 # Eclipse Cargo Tracker - Applied Domain-Driven Design Blueprints for Jakarta EE
 
+> [!NOTE]
+> The title references "Jakarta EE" from the upstream [Eclipse Cargo Tracker](https://github.com/eclipse-ee4j/cargotracker) project. This branch runs **Java EE 7** on JBoss EAP 7.4 (`javax.*` namespace). The Jakarta EE migration happens in the `jakartaee10-eap8` branch.
+
 > **This branch (`jee7-eap7`) has been adapted to run on JBoss EAP 7.4 with Java 11.**
 > The original application targets Payara/Glassfish with Java 8  - see the [`javaee7`](https://github.com/marcelomrwin/rh-cargotracker/tree/javaee7) branch for that version.
 
@@ -65,14 +68,14 @@ Access the application at: http://localhost:8080/cargo-tracker
 - Java upgraded from 8 to 11
 - Internal database changed from Derby to H2
 - JMS resource adapter reference removed (EAP uses a single default adapter)
-- MOXy JSON provider removed in favor of JSON-B
+- MOXy JSON provider removed; REST endpoints use JSON-P (JSON Processing) directly
 - Persistence layer adjusted for Hibernate (`orphanRemoval` relaxed, lazy loading outside transactions enabled)
 
 ### Migration path
 
 | Phase | Branch | Runtime | Java | Focus |
 |-------|--------|---------|------|-------|
-| - | `javaee7` | Payara 4.1 | 8 | Original application |
+| - | `javaee7` | Payara 4.1.2.181 | 8 | Original application |
 | 1 | **`jee7-eap7`** | **JBoss EAP 7.4 (VM)** | **11** | **Migration to Red Hat platform (current)** |
 | 2 | `jakartaee10-eap8` | JBoss EAP 8.1 (VM) | 17 | Jakarta EE 10 migration |
 | 3 | `jakartaee10-eap8` | JBoss EAP 8.1 (OpenShift) | 17 | Containerization, cloud readiness |
