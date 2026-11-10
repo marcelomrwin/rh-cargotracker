@@ -14,8 +14,8 @@ This branch includes an MTA (Migration Toolkit for Applications) analysis report
 
 ### Prerequisites
 
-> [!WARNING]
-> EAP 7.4 does not support Java 17+. Use Java 11.
+> [!NOTE]
+> This branch uses Java 11. EAP 7.4 also supports Java 17 (from Update 7+), but this demo uses Java 11 to match the original Payara branch baseline. See [Red Hat KB article](https://access.redhat.com/articles/6961884) for Java 17 details.
 
 - Java 11 (`JAVA_HOME` must point to a Java 11 JDK)
 - Maven 3.6+
